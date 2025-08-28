@@ -1,0 +1,20 @@
+请实现RAG增强的AI引擎，位于src/poe2build/rag/:
+
+1. **ai_enhanced.py**: RAG增强AI推荐引擎
+   - 用户查询向量化
+   - 相似构筑检索和分析
+   - 构筑模式识别
+   - 基于RAG上下文的推荐生成
+   
+2. **核心算法**:
+   - 构筑模式分析算法
+   - Meta洞察生成
+   - 推荐置信度评估
+   - 优化建议生成
+
+参考文档: docs/12_rag_ai_training.md 中的PoE2RAGEnhancedAI实现
+
+功能要求:
+- 基于真实ninja.poe2数据的推荐
+- 包含RAG上下文信息的丰富输出
+- 支持多种推荐策略和偏好

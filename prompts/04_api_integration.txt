@@ -1,0 +1,22 @@
+请实现真实的PoE2数据源集成，位于src/poe2build/data_sources/:
+
+1. **poe2_scout.py**: PoE2Scout API集成
+   - URL: https://poe2scout.com
+   - 功能: 市场价格、流行构筑数据
+   - 实现缓存 (10分钟TTL)
+   
+2. **ninja_scraper.py**: poe.ninja PoE2数据抓取
+   - URL: https://poe.ninja/poe2/builds
+   - 功能: Meta分析、构筑排行榜
+   - 实现异步爬取和数据清洗
+   
+3. **poe2db_scraper.py**: PoE2DB数据抓取
+   - URL: https://poe2db.tw
+   - 功能: 游戏数据 (技能、物品、天赋)
+   - 实现智能解析和数据标准化
+
+每个数据源都必须:
+- 继承base_provider中的基础类
+- 实现完整的错误处理和降级机制
+- 包含Mock数据作为最后的保障
+- 遵循"生态公民"的访问频率限制

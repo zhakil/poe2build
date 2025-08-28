@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(where npm)",
+      "Bash(npm config:*)",
+      "Bash(npm config get:*)",
+      "Bash(where node)",
+      "Bash(echo $PATH)",
+      "Bash(D:/nodejs/npm-global/npm.cmd --version)",
+      "Bash(powershell:*)",
+      "Bash(\"D:\\nodejs\\npm-global\\gemini.cmd\" --version)",
+      "Bash(git init:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

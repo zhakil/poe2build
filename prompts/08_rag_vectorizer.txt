@@ -1,0 +1,20 @@
+请实现RAG向量化系统，位于src/poe2build/rag/:
+
+1. **vectorizer.py**: 构筑数据向量化
+   - 使用sentence-transformers进行文本嵌入
+   - 构筑描述生成算法
+   - FAISS索引构建和管理
+   - 向量数据库的持久化
+   
+2. **retrieval.py**: 相似度检索引擎
+   - 快速向量搜索实现
+   - 相似度阈值和过滤
+   - 多维度检索 (职业、技能、预算等)
+   - 结果排序和优化
+
+参考文档: docs/12_rag_ai_training.md 中的PoE2RAGVectorizer实现
+
+技术要求:
+- sentence-transformers模型: "all-MiniLM-L6-v2"
+- FAISS索引类型: IndexFlatIP
+- 支持增量索引更新
