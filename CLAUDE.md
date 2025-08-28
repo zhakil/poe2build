@@ -8,7 +8,14 @@ This is a **Path of Exile 2 (PoE2) Build Generator** that uses real, verified Po
 
 ### Core Architecture
 
-The system follows a **PoB2集成架构（PoB2-Integrated Architecture）** leveraging Path of Building Community for accurate calculations:
+The system follows a **PoB2集成架构（PoB2-Integrated Architecture）** leveraging Path of Building Community for Path of Exile 2 (https://github.com/PathOfBuildingCommunity/PathOfBuilding-PoE2) for accurate calculations:
+
+**Path of Building Community PoE2 Features:**
+- Offline build planner specifically for Path of Exile 2
+- Comprehensive damage and defense calculations
+- Passive skill tree planner with full PoE2 support
+- Character importing and build sharing capabilities
+- Version: v0.9.0+ (active development)
 
 #### 1. PoB2-Driven Architecture
 ```
@@ -27,17 +34,17 @@ IDataProvider (interface)
 #### 2. Core Components
 1. **PoE2AIOrchestrator** - AI-driven build recommendation coordinator
 2. **PoB2 Integration Layer**:
-   - `PoB2LocalClient` - Local Path of Building Community interface
+   - `PoB2LocalClient` - Local Path of Building Community PoE2 interface
    - `PoB2BuildGenerator` - AI-generated build creation for PoB2
-   - `PoB2Calculator` - Leverage PoB2's calculation engine
+   - `PoB2Calculator` - Leverage Path of Building Community PoE2's calculation engine
 3. **AI Recommendation Engine** - Generate optimized build configurations
 4. **Data Collection Layer**:
    - `PoE2ScoutAPI` (https://poe2scout.com) - Market pricing data
    - `PoE2NinjaScraper` (https://poe.ninja/poe2/builds) - Meta trends
 5. **Resilience Layer**:
-   - **PoB2 Installation Detection** - Auto-locate local PoB2 installation
-   - **Fallback Mechanisms** - Web PoB2 or cached calculations when local unavailable
-   - **Build Validation** - Verify AI-generated builds are valid in PoB2
+   - **PoB2 Installation Detection** - Auto-locate local Path of Building Community PoE2 installation
+   - **Fallback Mechanisms** - Backup calculations when Path of Building unavailable
+   - **Build Validation** - Verify AI-generated builds are valid using Path of Building Community PoE2
 
 #### 3. "生态公民" Philosophy
 - Respectful API usage with intelligent rate limiting
@@ -46,60 +53,71 @@ IDataProvider (interface)
 
 ## Common Commands
 
-### Running the Application
-```bash
-# Main entry point - runs the PoB2-integrated AI recommendation system
-python poe2_ai_orchestrator.py
-```
+### Project Structure
+This project follows a modular architecture with the main source code in `src/poe2build/` and tests in `tests/`. 
 
 ### Development Setup
 ```bash
+# Create virtual environment
+python -m venv venv
+venv\Scripts\activate  # Windows
+source venv/bin/activate  # Linux/Mac
+
 # Install dependencies
 pip install -r requirements.txt
 
-# Alternative: Install dependencies manually
-pip install requests beautifulsoup4 psutil
-
-# Verify PoB2 installation detection
-python -c "from poe2_ai_orchestrator import PoB2LocalClient; PoB2LocalClient().detect_pob2_installation()"
-
-# Health check - verify all systems are accessible
-python -c "from poe2_ai_orchestrator import PoE2AIOrchestrator; PoE2AIOrchestrator().health_check()"
+# Install development dependencies
+pip install -e ".[dev]"
 ```
 
-### Testing Individual Components
+### Testing
 ```bash
-# Test PoB2 integration
-python -c "
-from poe2_ai_orchestrator import PoB2LocalClient
-pob2 = PoB2LocalClient()
-if pob2.is_available():
-    print('PoB2 successfully detected at:', pob2.installation_path)
-else:
-    print('PoB2 not found, will use web fallback')
-"
+# Run all tests
+pytest
 
-# Test RAG-enhanced AI build generation + PoB2 calculation
-python -c "
-from poe2_ai_orchestrator import PoE2AIOrchestrator
-orchestrator = PoE2AIOrchestrator()
-build_request = {'preferences': {'class': 'Ranger', 'style': 'bow', 'goal': 'endgame'}}
-recommendation = orchestrator.generate_build_recommendation(build_request)
-print(f'RAG-generated builds: {len(recommendation[\"recommendations\"])}')
-for rec in recommendation['recommendations'][:2]:
-    print(f'- {rec[\"build_name\"]} (RAG confidence: {rec.get(\"rag_confidence\", 0):.3f})')
-    if 'pob2_stats' in rec:
-        print(f'  PoB2 DPS: {rec[\"pob2_stats\"][\"total_dps\"]:,}')
-"
+# Run tests with coverage
+pytest --cov=src/poe2build --cov-report=html
+
+# Run specific test categories
+pytest -m unit          # Unit tests only
+pytest -m integration   # Integration tests only
+pytest -m e2e           # End-to-end tests only
+
+# Run single test file
+pytest tests/unit/test_models.py
+```
+
+### Code Quality
+```bash
+# Format code with black
+black src/ tests/
+
+# Type checking with mypy
+mypy src/poe2build
+
+# Linting with flake8
+flake8 src/ tests/
+```
+
+### Running the Application
+```bash
+# Demo models and validate architecture
+python examples/demo_models.py
+
+# Main entry point (when implemented)
+python -m poe2build.cli
+
+# Run development setup script
+python scripts/setup_dev.py
 ```
 
 ## Key Implementation Details
 
 ### PoB2 Integration Strategy
-- **Local-First Approach**: Prioritize local PoB2 installation for maximum accuracy
-- **Dynamic Discovery**: Auto-detect PoB2 installation paths across different systems
-- **Build Generation**: AI creates optimized build configurations that PoB2 can calculate
-- **Validation Pipeline**: Verify all AI-generated builds are valid in PoB2 before recommendations
+- **Local-First Approach**: Prioritize local Path of Building Community PoE2 installation for maximum accuracy
+- **Dynamic Discovery**: Auto-detect Path of Building installation paths across different systems
+- **Build Generation**: AI creates optimized build configurations that Path of Building Community PoE2 can calculate
+- **Validation Pipeline**: Verify all AI-generated builds are valid using Path of Building Community PoE2 before recommendations
 
 ### RAG-Enhanced AI Build Generation
 - **ninja.poe2 RAG Training**: Use real player build data from poe.ninja/poe2 as training knowledge base
@@ -126,7 +144,7 @@ class CircuitBreaker:
 rate_limits = {
     'poe2scout.com': {'requests_per_minute': 30, 'backoff_factor': 2},
     'poe2db.tw': {'requests_per_minute': 20, 'backoff_factor': 1.5}, 
-    'poe.ninja': {'requests_per_minute': 10, 'backoff_factor': 3}
+    'poe.ninja/poe2': {'requests_per_minute': 10, 'backoff_factor': 3}
 }
 ```
 
@@ -137,23 +155,38 @@ Every external call has four resilience layers:
 3. **Fall back to cached data** - Last known good data
 4. **Use mock data as last resort** - Never fail completely
 
-## File Structure
+## Project Architecture
 
-- `poe2_ai_orchestrator.py` - Main PoB2-integrated AI orchestrator with `main()` entry point
-- `pob2_local_client.py` - Local Path of Building Community interface and integration
-- `ai_build_generator.py` - AI-driven build recommendation and generation engine
-- `requirements.txt` - Project dependencies (including psutil for process detection)
-- `docs/` - Comprehensive documentation including architecture, API usage, deployment, and troubleshooting
-  - `01_real_architecture.md` - Architecture overview
-  - `02_poe2_data_sources.md` - Data sources documentation
-  - `03_poe2_calculator.md` - Build calculator details
-  - `04_api_usage.md` - API usage examples
-  - `05_developer_guide.md` - Developer guidelines
-  - `06_deployment.md` - Deployment instructions
-  - `07_troubleshooting.md` - Troubleshooting guide
-- Chinese documentation files:
-  - `《流放之路2》生态系统程序化访问开发者指南：关键社区及官方工具API分析.docx`
-  - `How to query POE2 API.docx`
+### Source Code Structure
+```
+src/poe2build/
+├── core/           # Main orchestration and coordination
+├── data_sources/   # External API integrations
+├── models/         # Data models and structures
+├── pob2/          # Path of Building integration
+├── rag/           # RAG AI training system
+├── utils/         # Utility functions
+└── config/        # Configuration management
+
+tests/
+├── unit/          # Unit tests
+├── integration/   # Integration tests
+├── performance/   # Performance tests
+├── e2e/          # End-to-end tests
+└── fixtures/     # Test fixtures and mock data
+
+examples/          # Demo and example scripts
+docs/             # Documentation
+scripts/          # Development and deployment scripts
+```
+
+### Key Files
+- `src/poe2build/models/build.py` - Core build data models with PoE2-specific mechanics
+- `src/poe2build/models/characters.py` - Character classes and ascendancies
+- `src/poe2build/models/items.py` - Item and equipment models
+- `examples/demo_models.py` - Demonstrates all data model features
+- `pyproject.toml` - Modern Python project configuration
+- `requirements.txt` - Production dependencies
 
 ## Important Constants
 
@@ -207,27 +240,28 @@ response = {
 }
 ```
 
-## Testing & Quality Assurance
+## Development Status and Architecture
 
-### Manual Testing
-```bash
-# Test the main application
-python poe2_real_data_sources.py
+### Current Implementation Status
+The project is in active development with the following components implemented:
 
-# Test individual components (see "Testing Individual Components" section above)
+**Phase 1 Complete: Foundation and Data Models**
+- ✅ Complete data model system with PoE2-specific mechanics
+- ✅ Character classes, ascendancies, and PoE2 unique features
+- ✅ Build stats with 80% max resistance validation
+- ✅ Skill system with Spirit cost mechanics
+- ✅ Item and weapon modeling
+- ✅ Market data structures
 
-# Validate data sources accessibility
-python -c "from poe2_real_data_sources import PoE2RealDataOrchestrator; PoE2RealDataOrchestrator().health_check()"
-```
+**In Progress: Multi-Phase Architecture**
+- 🔄 Data source integrations (PoE2Scout, ninja.poe2)
+- 🔄 PoB2 local installation detection and integration
+- 🔄 RAG AI training system with ninja.poe2 data
+- 🔄 Core AI orchestrator
+- 🔄 Resilience and circuit breaker patterns
 
-### Code Quality
-```bash
-# Python style check (if flake8 installed)
-flake8 poe2_real_data_sources.py
-
-# Type checking (if mypy installed)
-mypy poe2_real_data_sources.py
-```
+### Implementation Order
+Follow `IMPLEMENTATION_ORDER.md` for the complete 6-phase development plan. Current focus should be on Phase 2 (Data Sources) and Phase 3 (PoB2 Integration).
 
 ## Future Architecture Evolution
 
@@ -246,14 +280,27 @@ scout_api = PoE2ScoutAPI()
 trade_provider = TradeProviderFactory.create('scout')  # or 'official' when available
 ```
 
-## Development Notes
+## Development Guidelines
 
-- **Architecture Philosophy**: Modular, interface-based design for ecosystem adaptability
-- **Language**: Mix of Chinese comments and English code (project originated in Chinese context)
-- **No Tests**: No formal test suite exists yet - testing is done via manual execution
-- **Dependencies**: Minimal - only requests and beautifulsoup4 required (see requirements.txt)
-- **Network Dependent**: All functionality requires internet access to external PoE2 data sources
-- **Graceful Degradation**: System continues to function even when external APIs are unavailable
-- **生态公民意识**: Respectful API usage designed to maintain community service access
+### Architecture Philosophy
+- **Modular Design**: Interface-based components for ecosystem adaptability
+- **PoE2-Specific**: All mechanics and calculations tailored for Path of Exile 2
+- **Type Safety**: Comprehensive type annotations with dataclasses
+- **Validation**: Built-in data validation with PoE2-specific rules
+- **Resilience**: Circuit breaker patterns and graceful degradation
 
-The codebase prioritizes working functionality over perfect code structure, with emphasis on resilience, respectful API usage, and adaptability to the evolving PoE2 ecosystem.
+### Code Standards
+- **Python 3.8+**: Modern Python with type hints
+- **Data Models**: Use dataclasses with validation in `__post_init__`
+- **Error Handling**: Validate ranges (e.g., resistances -100% to +80%)
+- **Testing**: Comprehensive test coverage with pytest
+- **Documentation**: Clear docstrings and examples
+
+### PoE2-Specific Mechanics
+- **Max Resistance**: 80% cap (not 75% like PoE1)
+- **Spirit System**: Unique PoE2 resource for auras and skills
+- **Currency**: Divine Orbs as primary high-value currency
+- **Character Classes**: 6 classes with 2 ascendancies each
+- **Chaos Resistance**: Can be negative (penalty system)
+
+The project follows a "working architecture first" approach with emphasis on PoE2 accuracy, respectful API usage, and community ecosystem compatibility.

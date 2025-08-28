@@ -1,33 +1,44 @@
-请基于docs/11_pob2_integration.md实现PoB2集成系统:
+请集成 Path of Building Community for Path of Exile 2 (https://github.com/PathOfBuildingCommunity/PathOfBuilding-PoE2):
 
-1. **src/poe2build/pob2/local_client.py**:
-   - 实现docs中的PoB2LocalClient类
-   - _detect_installation()方法：智能检测PoB2安装路径
-   - _verify_pob2_installation()：验证安装有效性
-   - _get_version_info()：获取PoB2版本信息
-   - 支持用户路径: F:\steam\steamapps\common\Path of Exile 2\Path of Building Community (PoE2)
-   
-2. **src/poe2build/pob2/path_detector.py**:
-   - 参考docs中的PoB2PathDetector设计
-   - get_search_paths()：多平台路径搜索
-   - detect_via_registry()：Windows注册表检测
-   - detect_via_process()：运行进程检测
-   - 跨平台支持 (Windows/Mac/Linux)
-   
-3. **src/poe2build/pob2/build_generator.py**:
-   - 实现docs中的PoB2BuildGenerator类
-   - generate_build_recommendation()：AI驱动构筑生成
-   - _validate_with_pob2()：PoB2验证计算
-   - _generate_pob2_import_code()：生成导入代码
-   - _execute_pob2_calculation()：执行PoB2计算
+**项目验证**: 
+- 专门为 Path of Exile 2 设计的离线构筑规划器
+- 版本: v0.9.0+ (MIT 许可证，活跃开发中)
+- 特性: PoE2 专用伤害/防御计算、天赋树规划、角色导入、构筑分享
+
+**核心原则**: 直接利用现有的 Path of Building Community for PoE2 工具，不重复造轮子
+
+1. **src/poe2build/pob2/path_detector.py**: 
+   - Path of Building Community PoE2 安装检测
+   - 检测 GitHub 项目: PathOfBuildingCommunity/PathOfBuilding-PoE2
+   - 多平台检测 (Windows/Mac/Linux)
+   - 常见安装位置: Steam、Epic、独立安装、便携版
+   - 可执行文件识别: "Path of Building.exe", "PathOfBuilding", "PoB2.exe" 等
+   - Windows注册表检测、进程检测、文件系统搜索
+   - 手动路径配置支持
+
+2. **src/poe2build/pob2/local_client.py**:
+   - Path of Building Community PoE2 客户端接口
+   - 进程管理和启动参数
+   - 导入代码自动加载到 Path of Building
+   - 计算结果监控和导出
+   - 超时和错误处理
+   - 版本兼容性检查
+
+3. **src/poe2build/pob2/import_export.py**:
+   - 构筑数据 → Path of Building 导入代码转换
+   - Path of Building 计算结果解析
+   - PoB2 构筑格式标准化
+   - 数据验证和清洗
 
 4. **src/poe2build/pob2/calculator.py**:
-   - PoB2计算接口封装
-   - 计算结果解析和标准化
+   - Path of Building Community PoE2 计算接口封装
+   - 自动化计算流程管理
+   - 结果解析和标准化输出
    - 错误处理和超时管理
 
 实现要求:
-- 完全基于docs/11_pob2_integration.md的设计
-- AI负责方案生成，PoB2负责精确计算
-- 实现多平台PoB2检测算法
-- 包含完整的降级和错误处理机制
+- 完全依赖 Path of Building Community PoE2 的官方计算引擎
+- 支持多种安装方式的自动检测
+- 实现与 Path of Building 的无缝数据交换
+- 包含完整的跨平台支持
+- 当 Path of Building 不可用时的优雅降级

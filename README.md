@@ -53,9 +53,10 @@ graph TB
     
     subgraph "PoB2集成层"
         B --> C[PoB2LocalClient]
-        C --> D[本地PoB2检测]
-        C --> E[构筑导入代码生成]
-        C --> F[PoB2精确计算]
+        C --> D["Path of Building Community PoE2 检测"]
+        C --> E["PoB2 导入/导出代码生成"]
+        C --> F["PoB2 官方计算引擎"]
+        D --> |"GitHub: PathOfBuildingCommunity/PathOfBuilding-PoE2"| F
     end
     
     subgraph "RAG智能层"
@@ -235,56 +236,66 @@ python -c "import requests, beautifulsoup4, sentence_transformers, faiss, psutil
 - 遵循"生态公民"的访问频率限制
 ```
 
-### Phase 3: PoB2集成系统 ⏱️ 2天
+### Phase 3: Path of Building Community PoE2 集成系统 ⏱️ 2天
 
-**目标**: 基于docs/11_pob2_integration.md实现PoB2本地集成
+**目标**: 集成官方 Path of Building Community for Path of Exile 2 (https://github.com/PathOfBuildingCommunity/PathOfBuilding-PoE2)
+- 专为 **Path of Exile 2** 设计的离线构筑规划器
+- 版本: v0.9.0+ (持续开发中)
+- 特性: 精确伤害和防御计算、天赋树规划、角色导入、构筑分享
 
-#### 3.1 PoB2路径检测和客户端
+#### 3.1 Path of Building Community PoE2 安装检测和客户端
 **Prompt文件**: `prompts/05_pob2_integration.txt`
 ```
-请实现PoB2本地集成系统，位于src/poe2build/pob2/:
+请实现Path of Building Community PoE2集成系统，位于src/poe2build/pob2/:
 
-1. **path_detector.py**: PoB2安装路径检测
+**核心原则**: 直接利用现有的 Path of Building Community PoE2 工具，不重复造轮子
+
+1. **path_detector.py**: Path of Building Community PoE2 安装检测
+   - 检测 GitHub 项目: PathOfBuildingCommunity/PathOfBuilding-PoE2
    - 多平台检测 (Windows/Mac/Linux)
-   - 常见安装位置搜索
-   - Steam、Epic、独立安装检测
+   - 常见安装位置: Steam、Epic、独立安装、便携版
+   - 可执行文件识别: Path of Building.exe, PathOfBuilding 等
    - 手动路径配置支持
    
-2. **local_client.py**: PoB2本地客户端接口
-   - PoB2进程管理
-   - 命令行参数构建
-   - 结果文件监控和解析
+2. **local_client.py**: Path of Building Community PoE2 客户端接口
+   - 进程管理和启动参数
+   - 导入代码自动加载
+   - 计算结果导出监控
    - 超时和错误处理
+   - 版本兼容性检查
    
-3. **import_export.py**: PoB2数据格式转换
-   - 构筑数据到PoB2格式转换
-   - PoB2导入代码生成
-   - 计算结果解析
+3. **import_export.py**: PoB2 数据格式转换
+   - 构筑数据 → Path of Building 导入代码
+   - Path of Building 计算结果解析
+   - PoB2 构筑格式标准化
    - 数据验证和清洗
 
 实现要求:
-- 支持用户提供的路径: F:\steam\steamapps\common\Path of Exile 2\Path of Building Community (PoE2)
-- 但使用动态搜索而非硬编码路径
+- 完全依赖 Path of Building Community PoE2 的计算引擎
+- 支持多种安装方式的自动检测
+- 实现与 PoB2 的无缝数据交换
 - 包含完整的跨平台支持
-- 实现优雅的降级机制
+- 当 PoB2 不可用时的优雅降级
 ```
 
-#### 3.2 PoB2计算引擎集成
+#### 3.2 Path of Building Community PoE2 计算引擎集成
 **Prompt文件**: `prompts/06_pob2_calculator.txt`
 ```
-请实现PoB2计算引擎集成，位于src/poe2build/pob2/:
+请实现Path of Building Community PoE2计算引擎集成，位于src/poe2build/pob2/:
 
-1. **calculator.py**: PoB2计算接口
-   - 构筑数据转换为PoB2可识别格式
-   - PoB2命令行调用和结果获取
-   - DPS、防御、生存能力计算
+1. **calculator.py**: Path of Building Community PoE2 计算接口
+   - 构筑数据转换为 PoB2 导入代码格式
+   - Path of Building 进程启动和管理
+   - DPS、防御、生存能力精确计算
+   - 计算结果自动导出和解析
    - 错误处理和结果验证
 
 功能要求:
-- AI提供构筑方案，PoB2进行精确计算
-- 支持PoE2特有机制的计算验证
+- AI提供构筑方案，Path of Building Community PoE2 进行官方级精确计算
+- 利用 PoB2 的完整 PoE2 机制支持 (技能宝石、天赋、装备等)
+- 实现与 PoB2 的自动化数据交换
 - 实现计算结果的标准化输出
-- 包含计算失败时的备用方案
+- 包含 PoB2 不可用时的备用计算方案
 ```
 
 ### Phase 4: RAG训练系统 ⏱️ 2天
