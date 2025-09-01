@@ -1,0 +1,1142 @@
+请实现PoE2智能构筑生成器的GUI组件系统：
+
+## 19.1 组件系统架构设计
+
+### 组件分类体系
+```
+PoE2 GUI Components
+├── Base Components (基础组件)
+│   ├── PoE2Widget (所有组件基类)
+│   ├── PoE2Dialog (对话框基类)
+│   ├── PoE2Frame (框架容器基类)
+│   └── PoE2Button (按钮基类)
+├── Form Components (表单组件)
+│   ├── ClassSelector (职业选择器)
+│   ├── SkillTreeWidget (技能树组件)
+│   ├── BudgetSlider (预算滑块)
+│   ├── GoalSelector (目标选择器)
+│   └── AdvancedOptions (高级选项面板)
+├── Display Components (展示组件)
+│   ├── BuildCard (构筑展示卡片)
+│   ├── StatDisplay (统计数据展示)
+│   ├── BuildComparison (构筑对比表)
+│   ├── ProgressChart (进度图表)
+│   └── ResultsList (结果列表)
+├── Interactive Components (交互组件)
+│   ├── SearchableComboBox (可搜索下拉框)
+│   ├── TagInput (标签输入器)
+│   ├── FileDropArea (文件拖放区域)
+│   ├── TooltipWidget (增强提示框)
+│   └── ContextMenu (右键菜单)
+└── System Components (系统组件)
+    ├── NotificationToast (通知Toast)
+    ├── ProgressOverlay (进度遮罩)
+    ├── StatusIndicator (状态指示器)
+    ├── SystemTrayIcon (系统托盘图标)
+    └── SplashScreen (启动画面)
+```
+
+### 组件继承体系
+```python
+# 基础组件继承关系
+QWidget
+├── PoE2Widget (基础主题和样式)
+│   ├── PoE2Frame (容器组件)
+│   │   ├── BuildCard
+│   │   ├── StatDisplay  
+│   │   └── AdvancedOptions
+│   ├── PoE2Button (按钮组件)
+│   │   ├── ClassButton
+│   │   ├── ActionButton
+│   │   └── ToggleButton
+│   └── PoE2Input (输入组件)
+│       ├── SearchInput
+│       ├── NumberInput
+│       └── TagInput
+├── QDialog
+│   └── PoE2Dialog (对话框基类)
+│       ├── SettingsDialog
+│       ├── AboutDialog
+│       └── ConfirmDialog
+└── QSystemTrayIcon
+    └── PoE2TrayIcon
+```
+
+## 19.2 基础组件实现
+
+### PoE2Widget 基类
+```python
+class PoE2Widget(QWidget):
+    """所有PoE2组件的基类，提供统一的主题和行为"""
+    
+    # 信号定义
+    theme_changed = pyqtSignal(str)  # 主题变更信号
+    validation_failed = pyqtSignal(str)  # 验证失败信号
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._setup_theme()
+        self._setup_animations()
+        self._setup_tooltips()
+        
+    def _setup_theme(self):
+        """设置PoE2主题样式"""
+        self.setProperty("poe2_widget", True)
+        self._apply_base_styles()
+        
+    def _setup_animations(self):
+        """设置动画效果"""
+        self.fade_animation = QPropertyAnimation(self, b"windowOpacity")
+        self.slide_animation = QPropertyAnimation(self, b"pos")
+        
+    def _apply_base_styles(self):
+        """应用基础样式"""
+        self.setStyleSheet("""
+        QWidget[poe2_widget="true"] {
+            background-color: #1a1a1a;
+            border: 1px solid #444444;
+            border-radius: 4px;
+            color: #f0f0f0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        """)
+        
+    def set_validation_state(self, valid: bool, message: str = ""):
+        """设置验证状态"""
+        if valid:
+            self.setProperty("validation_state", "valid")
+        else:
+            self.setProperty("validation_state", "invalid")
+            if message:
+                self.validation_failed.emit(message)
+        self.style().unpolish(self)
+        self.style().polish(self)
+        
+    def fade_in(self, duration=300):
+        """淡入动画"""
+        self.fade_animation.setDuration(duration)
+        self.fade_animation.setStartValue(0.0)
+        self.fade_animation.setEndValue(1.0)
+        self.fade_animation.start()
+        
+    def pulse_border(self, color="#c9aa71"):
+        """边框脉冲效果"""
+        effect = QGraphicsDropShadowEffect()
+        effect.setBlurRadius(15)
+        effect.setColor(QColor(color))
+        self.setGraphicsEffect(effect)
+```
+
+### PoE2Button 组件
+```python
+class PoE2Button(QPushButton):
+    """PoE2风格按钮组件"""
+    
+    def __init__(self, text="", icon=None, button_type="primary", parent=None):
+        super().__init__(text, parent)
+        self.button_type = button_type
+        self._setup_button(icon)
+        
+    def _setup_button(self, icon):
+        """设置按钮样式和行为"""
+        if icon:
+            self.setIcon(icon)
+            self.setIconSize(QSize(16, 16))
+            
+        # 设置基础样式
+        self._apply_button_styles()
+        
+        # 添加hover效果
+        self.setCursor(Qt.PointingHandCursor)
+        self.installEventFilter(self)
+        
+    def _apply_button_styles(self):
+        """应用按钮样式"""
+        styles = {
+            "primary": """
+                QPushButton {
+                    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #c9aa71, stop:1 #b8956a);
+                    border: 2px solid #c9aa71;
+                    border-radius: 6px;
+                    color: #0a0a0a;
+                    font-weight: bold;
+                    padding: 8px 16px;
+                    min-height: 20px;
+                }
+                QPushButton:hover {
+                    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #d4b575, stop:1 #c9aa71);
+                    border-color: #d4b575;
+                }
+                QPushButton:pressed {
+                    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #b8956a, stop:1 #a8845a);
+                }
+                QPushButton:disabled {
+                    background: #666666;
+                    border-color: #555555;
+                    color: #999999;
+                }
+            """,
+            "secondary": """
+                QPushButton {
+                    background: #2a2a2a;
+                    border: 2px solid #4a9eff;
+                    border-radius: 6px;
+                    color: #f0f0f0;
+                    padding: 8px 16px;
+                    min-height: 20px;
+                }
+                QPushButton:hover {
+                    background: #3a3a3a;
+                    border-color: #5aa9ff;
+                }
+                QPushButton:pressed {
+                    background: #1a1a1a;
+                }
+            """,
+            "danger": """
+                QPushButton {
+                    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #e74c3c, stop:1 #c0392b);
+                    border: 2px solid #e74c3c;
+                    border-radius: 6px;
+                    color: white;
+                    font-weight: bold;
+                    padding: 8px 16px;
+                    min-height: 20px;
+                }
+                QPushButton:hover {
+                    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #ec7063, stop:1 #e74c3c);
+                }
+            """
+        }
+        
+        self.setStyleSheet(styles.get(self.button_type, styles["primary"]))
+        
+    def eventFilter(self, obj, event):
+        """处理事件过滤"""
+        if obj == self:
+            if event.type() == QEvent.Enter:
+                self._animate_hover_enter()
+            elif event.type() == QEvent.Leave:
+                self._animate_hover_leave()
+        return super().eventFilter(obj, event)
+        
+    def _animate_hover_enter(self):
+        """鼠标悬停进入动画"""
+        effect = QGraphicsDropShadowEffect()
+        effect.setBlurRadius(20)
+        effect.setColor(QColor("#c9aa71"))
+        effect.setOffset(0, 0)
+        self.setGraphicsEffect(effect)
+        
+    def _animate_hover_leave(self):
+        """鼠标悬停离开动画"""
+        self.setGraphicsEffect(None)
+```
+
+## 19.3 表单组件实现
+
+### ClassSelector 职业选择器
+```python
+class ClassSelector(PoE2Widget):
+    """PoE2职业选择器组件"""
+    
+    class_selected = pyqtSignal(str)  # 职业选择信号
+    ascendancy_selected = pyqtSignal(str)  # 专精选择信号
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.classes_data = self._load_classes_data()
+        self.selected_class = None
+        self.selected_ascendancy = None
+        self._setup_ui()
+        
+    def _setup_ui(self):
+        """设置用户界面"""
+        layout = QVBoxLayout(self)
+        
+        # 标题
+        title = QLabel("选择职业")
+        title.setStyleSheet("font-size: 18px; font-weight: bold; color: #c9aa71;")
+        layout.addWidget(title)
+        
+        # 职业网格
+        self.classes_grid = QGridLayout()
+        self._create_class_buttons()
+        layout.addLayout(self.classes_grid)
+        
+        # 专精选择区域
+        self.ascendancy_group = QGroupBox("专精选择")
+        self.ascendancy_layout = QVBoxLayout(self.ascendancy_group)
+        self.ascendancy_group.hide()  # 初始隐藏
+        layout.addWidget(self.ascendancy_group)
+        
+    def _create_class_buttons(self):
+        """创建职业按钮"""
+        classes = [
+            ("Witch", "法师", "witch.png"),
+            ("Ranger", "游侠", "ranger.png"), 
+            ("Monk", "武僧", "monk.png"),
+            ("Knight", "骑士", "knight.png"),
+            ("Sorceress", "女巫", "sorceress.png"),
+            ("Mercenary", "佣兵", "mercenary.png")
+        ]
+        
+        for i, (class_id, class_name, icon_file) in enumerate(classes):
+            button = ClassButton(class_id, class_name, icon_file)
+            button.class_clicked.connect(self._on_class_selected)
+            
+            row = i // 3
+            col = i % 3
+            self.classes_grid.addWidget(button, row, col)
+            
+    def _on_class_selected(self, class_id):
+        """职业选择处理"""
+        self.selected_class = class_id
+        self.class_selected.emit(class_id)
+        
+        # 显示专精选择
+        self._show_ascendancies(class_id)
+        
+    def _show_ascendancies(self, class_id):
+        """显示专精选择"""
+        # 清空现有专精
+        for i in reversed(range(self.ascendancy_layout.count())):
+            self.ascendancy_layout.itemAt(i).widget().setParent(None)
+            
+        # 添加新专精选项
+        ascendancies = self.classes_data[class_id]["ascendancies"]
+        for asc_id, asc_data in ascendancies.items():
+            radio = QRadioButton(asc_data["name"])
+            radio.setProperty("ascendancy_id", asc_id)
+            radio.toggled.connect(lambda checked, aid=asc_id: 
+                                self._on_ascendancy_selected(aid) if checked else None)
+            self.ascendancy_layout.addWidget(radio)
+            
+        self.ascendancy_group.show()
+        self.ascendancy_group.setTitle(f"{self.classes_data[class_id]['name']} 专精选择")
+        
+    def _on_ascendancy_selected(self, ascendancy_id):
+        """专精选择处理"""
+        self.selected_ascendancy = ascendancy_id
+        self.ascendancy_selected.emit(ascendancy_id)
+        
+    def _load_classes_data(self):
+        """加载职业数据"""
+        return {
+            "Witch": {
+                "name": "法师",
+                "description": "掌控元素魔法的法师",
+                "ascendancies": {
+                    "Infernalist": {"name": "炼狱使", "description": "火焰与恶魔专精"},
+                    "Chronomancer": {"name": "时空法师", "description": "时间操控专精"}
+                }
+            },
+            "Ranger": {
+                "name": "游侠", 
+                "description": "敏捷的远程战士",
+                "ascendancies": {
+                    "Deadeye": {"name": "神射手", "description": "弓箭专精"},
+                    "Pathfinder": {"name": "探路者", "description": "药剂专精"}
+                }
+            }
+            # ... 其他职业数据
+        }
+
+class ClassButton(PoE2Widget):
+    """职业选择按钮"""
+    
+    class_clicked = pyqtSignal(str)
+    
+    def __init__(self, class_id, class_name, icon_file, parent=None):
+        super().__init__(parent)
+        self.class_id = class_id
+        self.class_name = class_name
+        self.icon_file = icon_file
+        self.selected = False
+        self._setup_ui()
+        
+    def _setup_ui(self):
+        """设置UI"""
+        self.setFixedSize(120, 140)
+        self.setCursor(Qt.PointingHandCursor)
+        
+        layout = QVBoxLayout(self)
+        layout.setAlignment(Qt.AlignCenter)
+        
+        # 职业图标
+        icon_label = QLabel()
+        pixmap = QPixmap(f"resources/icons/class_icons/{self.icon_file}")
+        scaled_pixmap = pixmap.scaled(64, 64, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        icon_label.setPixmap(scaled_pixmap)
+        icon_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(icon_label)
+        
+        # 职业名称
+        name_label = QLabel(self.class_name)
+        name_label.setAlignment(Qt.AlignCenter)
+        name_label.setStyleSheet("font-weight: bold; color: #f0f0f0;")
+        layout.addWidget(name_label)
+        
+        # 设置样式
+        self._update_style()
+        
+    def _update_style(self):
+        """更新样式"""
+        style = """
+        ClassButton {
+            background: #2a2a2a;
+            border: 2px solid #444444;
+            border-radius: 8px;
+        }
+        ClassButton:hover {
+            border-color: #c9aa71;
+            background: #3a3a3a;
+        }
+        """
+        
+        if self.selected:
+            style += """
+            ClassButton {
+                border-color: #c9aa71;
+                background: #c9aa71;
+            }
+            """
+            
+        self.setStyleSheet(style)
+        
+    def mousePressEvent(self, event):
+        """鼠标点击事件"""
+        if event.button() == Qt.LeftButton:
+            self.selected = not self.selected
+            self._update_style()
+            if self.selected:
+                self.class_clicked.emit(self.class_id)
+        super().mousePressEvent(event)
+```
+
+### BudgetSlider 预算滑块组件
+```python
+class BudgetSlider(PoE2Widget):
+    """预算设置滑块组件"""
+    
+    budget_changed = pyqtSignal(int, str)  # 预算变更信号 (数量, 货币)
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.currency_types = ["Chaos Orb", "Divine Orb", "Exalted Orb"]
+        self.current_currency = "Divine Orb"
+        self.current_amount = 10
+        self._setup_ui()
+        
+    def _setup_ui(self):
+        """设置用户界面"""
+        layout = QVBoxLayout(self)
+        
+        # 标题
+        title = QLabel("预算设置")
+        title.setStyleSheet("font-size: 16px; font-weight: bold; color: #c9aa71;")
+        layout.addWidget(title)
+        
+        # 货币选择
+        currency_layout = QHBoxLayout()
+        currency_label = QLabel("货币类型:")
+        self.currency_combo = QComboBox()
+        self.currency_combo.addItems(self.currency_types)
+        self.currency_combo.currentTextChanged.connect(self._on_currency_changed)
+        
+        currency_layout.addWidget(currency_label)
+        currency_layout.addWidget(self.currency_combo)
+        currency_layout.addStretch()
+        layout.addLayout(currency_layout)
+        
+        # 金额滑块
+        amount_layout = QHBoxLayout()
+        
+        self.amount_slider = QSlider(Qt.Horizontal)
+        self.amount_slider.setMinimum(1)
+        self.amount_slider.setMaximum(100)
+        self.amount_slider.setValue(10)
+        self.amount_slider.valueChanged.connect(self._on_amount_changed)
+        
+        self.amount_display = QLabel("10")
+        self.amount_display.setStyleSheet("""
+            QLabel {
+                background: #2a2a2a;
+                border: 2px solid #444444;
+                border-radius: 4px;
+                padding: 4px 8px;
+                min-width: 40px;
+                color: #c9aa71;
+                font-weight: bold;
+            }
+        """)
+        
+        amount_layout.addWidget(QLabel("数量:"))
+        amount_layout.addWidget(self.amount_slider)
+        amount_layout.addWidget(self.amount_display)
+        layout.addLayout(amount_layout)
+        
+        # 预算建议
+        self.suggestion_label = QLabel()
+        self.suggestion_label.setWordWrap(True)
+        self.suggestion_label.setStyleSheet("color: #cccccc; font-style: italic;")
+        layout.addWidget(self.suggestion_label)
+        
+        self._update_suggestion()
+        
+    def _on_currency_changed(self, currency):
+        """货币类型变更"""
+        self.current_currency = currency
+        self._update_slider_range()
+        self._update_suggestion()
+        self.budget_changed.emit(self.current_amount, self.current_currency)
+        
+    def _on_amount_changed(self, amount):
+        """金额变更"""
+        self.current_amount = amount
+        self.amount_display.setText(str(amount))
+        self._update_suggestion()
+        self.budget_changed.emit(self.current_amount, self.current_currency)
+        
+    def _update_slider_range(self):
+        """更新滑块范围"""
+        ranges = {
+            "Chaos Orb": (10, 1000),
+            "Divine Orb": (1, 100), 
+            "Exalted Orb": (1, 50)
+        }
+        
+        min_val, max_val = ranges.get(self.current_currency, (1, 100))
+        self.amount_slider.setMinimum(min_val)
+        self.amount_slider.setMaximum(max_val)
+        
+        # 调整当前值到新范围内
+        if self.current_amount < min_val:
+            self.current_amount = min_val
+        elif self.current_amount > max_val:
+            self.current_amount = max_val
+            
+        self.amount_slider.setValue(self.current_amount)
+        
+    def _update_suggestion(self):
+        """更新预算建议"""
+        suggestions = {
+            "Chaos Orb": {
+                (10, 100): "适合新手，基础装备构筑",
+                (100, 500): "中等预算，平衡性构筑", 
+                (500, 1000): "高预算，优质装备构筑"
+            },
+            "Divine Orb": {
+                (1, 10): "入门级构筑，基础配置",
+                (10, 30): "主流构筑，良好性能",
+                (30, 100): "高端构筑，顶级配置"
+            }
+        }
+        
+        currency_suggestions = suggestions.get(self.current_currency, {})
+        suggestion_text = "设置你的构筑预算上限"
+        
+        for (min_val, max_val), text in currency_suggestions.items():
+            if min_val <= self.current_amount <= max_val:
+                suggestion_text = text
+                break
+                
+        self.suggestion_label.setText(f"建议: {suggestion_text}")
+```
+
+## 19.4 展示组件实现
+
+### BuildCard 构筑展示卡片
+```python
+class BuildCard(PoE2Widget):
+    """构筑展示卡片组件"""
+    
+    card_clicked = pyqtSignal(dict)  # 卡片点击信号
+    export_requested = pyqtSignal(dict)  # 导出请求信号
+    favorite_toggled = pyqtSignal(dict, bool)  # 收藏切换信号
+    
+    def __init__(self, build_data, parent=None):
+        super().__init__(parent)
+        self.build_data = build_data
+        self.is_favorite = build_data.get("is_favorite", False)
+        self._setup_ui()
+        
+    def _setup_ui(self):
+        """设置用户界面"""
+        self.setFixedSize(350, 200)
+        self.setCursor(Qt.PointingHandCursor)
+        
+        layout = QVBoxLayout(self)
+        
+        # 顶部信息行
+        top_layout = QHBoxLayout()
+        
+        # 构筑名称
+        self.name_label = QLabel(self.build_data["name"])
+        self.name_label.setStyleSheet("""
+            font-size: 16px; 
+            font-weight: bold; 
+            color: #c9aa71;
+        """)
+        top_layout.addWidget(self.name_label)
+        
+        top_layout.addStretch()
+        
+        # 收藏按钮
+        self.favorite_btn = QPushButton("★" if self.is_favorite else "☆")
+        self.favorite_btn.setFixedSize(24, 24)
+        self.favorite_btn.clicked.connect(self._toggle_favorite)
+        self.favorite_btn.setStyleSheet("""
+            QPushButton {
+                background: transparent;
+                border: none;
+                color: #c9aa71;
+                font-size: 18px;
+            }
+            QPushButton:hover {
+                color: #d4b575;
+            }
+        """)
+        top_layout.addWidget(self.favorite_btn)
+        
+        layout.addLayout(top_layout)
+        
+        # 职业和级别信息
+        info_layout = QHBoxLayout()
+        class_label = QLabel(f"{self.build_data['class']} - {self.build_data['ascendancy']}")
+        class_label.setStyleSheet("color: #4a9eff; font-weight: bold;")
+        
+        level_label = QLabel(f"等级: {self.build_data['level']}")
+        level_label.setStyleSheet("color: #cccccc;")
+        
+        info_layout.addWidget(class_label)
+        info_layout.addStretch()
+        info_layout.addWidget(level_label)
+        layout.addLayout(info_layout)
+        
+        # 统计数据网格
+        stats_layout = QGridLayout()
+        
+        stats = [
+            ("DPS", f"{self.build_data['dps']:,}", "#e74c3c"),
+            ("生命", f"{self.build_data['life']:,}", "#27ae60"),
+            ("护盾", f"{self.build_data['energy_shield']:,}", "#3498db"),
+            ("抗性", f"{self.build_data['resistances']}%", "#f39c12")
+        ]
+        
+        for i, (stat_name, stat_value, color) in enumerate(stats):
+            stat_widget = self._create_stat_widget(stat_name, stat_value, color)
+            row = i // 2
+            col = i % 2
+            stats_layout.addWidget(stat_widget, row, col)
+            
+        layout.addLayout(stats_layout)
+        
+        # 底部按钮栏
+        bottom_layout = QHBoxLayout()
+        
+        self.details_btn = PoE2Button("查看详情", button_type="secondary")
+        self.details_btn.clicked.connect(lambda: self.card_clicked.emit(self.build_data))
+        
+        self.export_btn = PoE2Button("导出PoB", button_type="primary") 
+        self.export_btn.clicked.connect(lambda: self.export_requested.emit(self.build_data))
+        
+        bottom_layout.addWidget(self.details_btn)
+        bottom_layout.addWidget(self.export_btn)
+        layout.addLayout(bottom_layout)
+        
+        # 设置卡片样式
+        self._apply_card_style()
+        
+    def _create_stat_widget(self, name, value, color):
+        """创建统计数据小部件"""
+        widget = QFrame()
+        layout = QVBoxLayout(widget)
+        layout.setContentsMargins(4, 4, 4, 4)
+        
+        name_label = QLabel(name)
+        name_label.setStyleSheet("color: #cccccc; font-size: 11px;")
+        name_label.setAlignment(Qt.AlignCenter)
+        
+        value_label = QLabel(value)
+        value_label.setStyleSheet(f"color: {color}; font-weight: bold; font-size: 14px;")
+        value_label.setAlignment(Qt.AlignCenter)
+        
+        layout.addWidget(name_label)
+        layout.addWidget(value_label)
+        
+        return widget
+        
+    def _apply_card_style(self):
+        """应用卡片样式"""
+        self.setStyleSheet("""
+        BuildCard {
+            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                        stop:0 #2a2a2a, stop:1 #1a1a1a);
+            border: 2px solid #444444;
+            border-radius: 8px;
+        }
+        BuildCard:hover {
+            border-color: #c9aa71;
+            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                        stop:0 #3a3a3a, stop:1 #2a2a2a);
+        }
+        """)
+        
+    def _toggle_favorite(self):
+        """切换收藏状态"""
+        self.is_favorite = not self.is_favorite
+        self.favorite_btn.setText("★" if self.is_favorite else "☆")
+        self.favorite_toggled.emit(self.build_data, self.is_favorite)
+        
+    def mousePressEvent(self, event):
+        """鼠标点击事件"""
+        if event.button() == Qt.LeftButton:
+            # 添加点击动画效果
+            self._animate_click()
+        super().mousePressEvent(event)
+        
+    def _animate_click(self):
+        """点击动画效果"""
+        effect = QGraphicsDropShadowEffect()
+        effect.setBlurRadius(25)
+        effect.setColor(QColor("#c9aa71"))
+        effect.setOffset(0, 0)
+        self.setGraphicsEffect(effect)
+        
+        # 短暂延迟后移除效果
+        QTimer.singleShot(200, lambda: self.setGraphicsEffect(None))
+```
+
+## 19.5 系统组件实现
+
+### NotificationToast 通知组件
+```python
+class NotificationToast(QWidget):
+    """系统通知Toast组件"""
+    
+    def __init__(self, message, notification_type="info", duration=3000, parent=None):
+        super().__init__(parent)
+        self.message = message
+        self.notification_type = notification_type
+        self.duration = duration
+        self._setup_ui()
+        self._setup_animations()
+        
+    def _setup_ui(self):
+        """设置用户界面"""
+        self.setFixedSize(300, 80)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(16, 12, 16, 12)
+        
+        # 图标
+        icon_label = QLabel()
+        icons = {
+            "info": "ℹ️",
+            "success": "✅", 
+            "warning": "⚠️",
+            "error": "❌"
+        }
+        icon_label.setText(icons.get(self.notification_type, "ℹ️"))
+        icon_label.setStyleSheet("font-size: 20px;")
+        layout.addWidget(icon_label)
+        
+        # 消息文本
+        message_label = QLabel(self.message)
+        message_label.setWordWrap(True)
+        message_label.setStyleSheet("""
+            color: white;
+            font-size: 13px;
+            font-weight: 500;
+        """)
+        layout.addWidget(message_label)
+        
+        # 关闭按钮
+        close_btn = QPushButton("×")
+        close_btn.setFixedSize(20, 20)
+        close_btn.clicked.connect(self.hide_notification)
+        close_btn.setStyleSheet("""
+            QPushButton {
+                background: transparent;
+                border: none;
+                color: white;
+                font-size: 16px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 10px;
+            }
+        """)
+        layout.addWidget(close_btn)
+        
+        self._apply_toast_style()
+        
+    def _apply_toast_style(self):
+        """应用Toast样式"""
+        colors = {
+            "info": "background: rgba(74, 158, 255, 0.9);",
+            "success": "background: rgba(39, 174, 96, 0.9);",
+            "warning": "background: rgba(243, 156, 18, 0.9);", 
+            "error": "background: rgba(231, 76, 60, 0.9);"
+        }
+        
+        style = f"""
+        NotificationToast {{
+            {colors.get(self.notification_type, colors["info"])}
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+        }}
+        """
+        self.setStyleSheet(style)
+        
+    def _setup_animations(self):
+        """设置动画"""
+        self.slide_animation = QPropertyAnimation(self, b"pos")
+        self.fade_animation = QPropertyAnimation(self, b"windowOpacity")
+        
+    def show_notification(self, position=None):
+        """显示通知"""
+        if position is None:
+            # 默认位置：屏幕右上角
+            screen = QApplication.primaryScreen().geometry()
+            x = screen.width() - self.width() - 20
+            y = 50
+            position = QPoint(x, y)
+            
+        self.move(position)
+        
+        # 从右侧滑入
+        start_pos = QPoint(position.x() + 300, position.y())
+        self.move(start_pos)
+        
+        self.show()
+        
+        # 滑入动画
+        self.slide_animation.setDuration(300)
+        self.slide_animation.setStartValue(start_pos)
+        self.slide_animation.setEndValue(position)
+        self.slide_animation.start()
+        
+        # 自动隐藏定时器
+        if self.duration > 0:
+            QTimer.singleShot(self.duration, self.hide_notification)
+            
+    def hide_notification(self):
+        """隐藏通知"""
+        # 淡出动画
+        self.fade_animation.setDuration(200)
+        self.fade_animation.setStartValue(1.0)
+        self.fade_animation.setEndValue(0.0)
+        self.fade_animation.finished.connect(self.close)
+        self.fade_animation.start()
+
+class NotificationManager(QObject):
+    """通知管理器"""
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.active_notifications = []
+        self.notification_queue = []
+        self.max_concurrent = 5
+        
+    def show_notification(self, message, notification_type="info", duration=3000):
+        """显示通知"""
+        if len(self.active_notifications) >= self.max_concurrent:
+            # 加入队列等待
+            self.notification_queue.append((message, notification_type, duration))
+            return
+            
+        # 计算位置
+        position = self._calculate_position(len(self.active_notifications))
+        
+        # 创建通知
+        toast = NotificationToast(message, notification_type, duration)
+        toast.finished.connect(lambda: self._on_notification_closed(toast))
+        
+        self.active_notifications.append(toast)
+        toast.show_notification(position)
+        
+    def _calculate_position(self, index):
+        """计算通知位置"""
+        screen = QApplication.primaryScreen().geometry()
+        x = screen.width() - 320
+        y = 50 + (index * 90)  # 每个通知高度80px + 10px间距
+        return QPoint(x, y)
+        
+    def _on_notification_closed(self, toast):
+        """通知关闭处理"""
+        if toast in self.active_notifications:
+            self.active_notifications.remove(toast)
+            
+        # 从队列中显示下一个通知
+        if self.notification_queue:
+            message, notification_type, duration = self.notification_queue.pop(0)
+            self.show_notification(message, notification_type, duration)
+            
+        # 重新排列剩余通知
+        self._rearrange_notifications()
+        
+    def _rearrange_notifications(self):
+        """重新排列通知位置"""
+        for i, toast in enumerate(self.active_notifications):
+            new_position = self._calculate_position(i)
+            
+            # 动画移动到新位置
+            animation = QPropertyAnimation(toast, b"pos")
+            animation.setDuration(200)
+            animation.setStartValue(toast.pos())
+            animation.setEndValue(new_position)
+            animation.start()
+```
+
+## 19.6 组件样式系统
+
+### 统一样式管理
+```python
+class PoE2StyleManager:
+    """PoE2样式管理器"""
+    
+    @staticmethod
+    def load_theme(theme_name="dark"):
+        """加载主题样式"""
+        theme_file = f"resources/themes/poe2_{theme_name}.qss"
+        try:
+            with open(theme_file, 'r', encoding='utf-8') as f:
+                return f.read()
+        except FileNotFoundError:
+            return PoE2StyleManager.get_default_style()
+            
+    @staticmethod
+    def get_default_style():
+        """获取默认样式"""
+        return """
+        /* PoE2 默认深色主题 */
+        QWidget {
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        
+        QMainWindow {
+            background-color: #0a0a0a;
+        }
+        
+        /* 按钮样式 */
+        QPushButton {
+            background: #2a2a2a;
+            border: 2px solid #444444;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-weight: 500;
+        }
+        
+        QPushButton:hover {
+            border-color: #c9aa71;
+            background: #3a3a3a;
+        }
+        
+        QPushButton:pressed {
+            background: #1a1a1a;
+        }
+        
+        /* 输入框样式 */
+        QLineEdit, QTextEdit, QPlainTextEdit {
+            background: #2a2a2a;
+            border: 2px solid #444444;
+            border-radius: 4px;
+            padding: 6px;
+            selection-background-color: #c9aa71;
+        }
+        
+        QLineEdit:focus, QTextEdit:focus, QPlainTextEdit:focus {
+            border-color: #4a9eff;
+        }
+        
+        /* 下拉框样式 */
+        QComboBox {
+            background: #2a2a2a;
+            border: 2px solid #444444;
+            border-radius: 4px;
+            padding: 6px;
+        }
+        
+        QComboBox:hover {
+            border-color: #c9aa71;
+        }
+        
+        QComboBox::drop-down {
+            border: none;
+            width: 20px;
+        }
+        
+        QComboBox::down-arrow {
+            image: url(resources/icons/ui_icons/dropdown_arrow.png);
+        }
+        
+        /* 滚动条样式 */
+        QScrollBar:vertical {
+            background: #1a1a1a;
+            width: 12px;
+            border-radius: 6px;
+        }
+        
+        QScrollBar::handle:vertical {
+            background: #444444;
+            border-radius: 6px;
+            min-height: 20px;
+        }
+        
+        QScrollBar::handle:vertical:hover {
+            background: #c9aa71;
+        }
+        
+        /* 分组框样式 */
+        QGroupBox {
+            font-weight: bold;
+            color: #c9aa71;
+            border: 2px solid #444444;
+            border-radius: 6px;
+            margin-top: 12px;
+            padding-top: 12px;
+        }
+        
+        QGroupBox::title {
+            subcontrol-origin: margin;
+            subcontrol-position: top left;
+            padding: 0 8px;
+            background: #1a1a1a;
+        }
+        """
+
+    @staticmethod 
+    def apply_component_style(widget, component_type):
+        """为特定组件应用样式"""
+        styles = {
+            "build_card": """
+            BuildCard {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                            stop:0 #2a2a2a, stop:1 #1a1a1a);
+                border: 2px solid #444444;
+                border-radius: 8px;
+            }
+            BuildCard:hover {
+                border-color: #c9aa71;
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                            stop:0 #3a3a3a, stop:1 #2a2a2a);
+            }
+            """,
+            
+            "class_button": """
+            ClassButton {
+                background: #2a2a2a;
+                border: 2px solid #444444;
+                border-radius: 8px;
+            }
+            ClassButton:hover {
+                border-color: #c9aa71;
+                background: #3a3a3a;
+            }
+            ClassButton:checked {
+                border-color: #c9aa71;
+                background: #c9aa71;
+            }
+            """
+        }
+        
+        if component_type in styles:
+            widget.setStyleSheet(styles[component_type])
+```
+
+## 19.7 组件测试和验证
+
+### 组件测试框架
+```python
+class ComponentTestWidget(QWidget):
+    """组件测试工具"""
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._setup_test_ui()
+        
+    def _setup_test_ui(self):
+        """设置测试界面"""
+        layout = QHBoxLayout(self)
+        
+        # 左侧：组件选择
+        left_panel = QVBoxLayout()
+        
+        component_list = QListWidget()
+        components = [
+            "ClassSelector",
+            "BudgetSlider", 
+            "BuildCard",
+            "NotificationToast",
+            "PoE2Button"
+        ]
+        component_list.addItems(components)
+        component_list.itemClicked.connect(self._show_component)
+        
+        left_panel.addWidget(QLabel("组件列表:"))
+        left_panel.addWidget(component_list)
+        
+        # 右侧：组件展示
+        self.display_area = QScrollArea()
+        self.display_area.setWidgetResizable(True)
+        self.display_area.setMinimumWidth(600)
+        
+        layout.addLayout(left_panel, 1)
+        layout.addWidget(self.display_area, 3)
+        
+    def _show_component(self, item):
+        """显示选中的组件"""
+        component_name = item.text()
+        
+        test_data = {
+            "name": "测试构筑",
+            "class": "Witch",
+            "ascendancy": "Infernalist", 
+            "level": 90,
+            "dps": 1250000,
+            "life": 6500,
+            "energy_shield": 2000,
+            "resistances": 75
+        }
+        
+        if component_name == "ClassSelector":
+            widget = ClassSelector()
+        elif component_name == "BudgetSlider":
+            widget = BudgetSlider()
+        elif component_name == "BuildCard":
+            widget = BuildCard(test_data)
+        elif component_name == "NotificationToast":
+            widget = NotificationToast("这是一个测试通知消息", "info")
+        elif component_name == "PoE2Button":
+            container = QWidget()
+            layout = QVBoxLayout(container)
+            layout.addWidget(PoE2Button("主要按钮", button_type="primary"))
+            layout.addWidget(PoE2Button("次要按钮", button_type="secondary"))
+            layout.addWidget(PoE2Button("危险按钮", button_type="danger"))
+            widget = container
+        else:
+            widget = QLabel(f"组件 {component_name} 暂未实现")
+            
+        self.display_area.setWidget(widget)
+```
+
+请确保组件系统实现：
+1. 统一的PoE2主题风格和用户体验
+2. 丰富的交互反馈和动画效果  
+3. 完整的信号槽通信机制
+4. 良好的性能和内存管理
+5. 便于扩展和维护的代码结构
+
+所有组件都应该遵循PoE2的视觉设计规范，提供流畅的用户交互体验，并与整体应用架构保持一致。

@@ -1,0 +1,631 @@
+请实现PoE2智能构筑生成器的工具函数和辅助模块：
+
+## 25.1 工具函数架构
+
+### 工具模块结构
+```
+src/poe2build/utils/
+├── __init__.py
+├── poe2_constants.py          # PoE2游戏常量
+├── data_validation.py         # 数据验证工具
+├── text_processing.py         # 文本处理工具
+├── math_helpers.py            # 数学计算辅助
+├── file_helpers.py            # 文件操作辅助
+├── network_helpers.py         # 网络请求辅助
+├── logging_config.py          # 日志配置
+└── performance_tools.py       # 性能分析工具
+```
+
+## 25.2 PoE2游戏常量
+
+### 核心游戏机制常量
+```python
+# src/poe2build/utils/poe2_constants.py
+
+"""PoE2游戏机制相关常量"""
+
+from typing import Dict, List, Set
+from enum import Enum
+
+class PoE2Constants:
+    """PoE2核心游戏常量"""
+    
+    # 抗性相关
+    MAX_RESISTANCE = 80          # PoE2最大抗性80%
+    BASE_CHAOS_RESISTANCE = -30  # 基础混沌抗性-30%
+    
+    # 能量护盾相关
+    ES_RECHARGE_DELAY = 2.0      # 能量护盾恢复延迟(秒)
+    ES_RECHARGE_RATE = 0.33      # 能量护盾恢复速率(每秒33%)
+    
+    # 生命相关
+    BASE_LIFE_PER_LEVEL = 12     # 每级基础生命
+    BASE_LIFE_START = 50         # 1级基础生命
+    
+    # 法力相关  
+    BASE_MANA_PER_LEVEL = 6      # 每级基础法力
+    BASE_MANA_START = 40         # 1级基础法力
+    
+    # 属性相关
+    LIFE_PER_STRENGTH = 0.5      # 每点力量增加0.5生命
+    MANA_PER_INTELLIGENCE = 0.5  # 每点智力增加0.5法力
+    ACCURACY_PER_DEXTERITY = 2   # 每点敏捷增加2命中
+    
+    # 伤害计算
+    CRIT_MULTIPLIER_BASE = 1.5   # 基础暴击倍率150%
+    
+    # 货币汇率(基准值,实际应从API获取)
+    CURRENCY_CHAOS_VALUES = {
+        'divine': 180,           # 1 Divine = 180 Chaos
+        'exalted': 45,          # 1 Exalted = 45 Chaos  
+        'ancient': 8,           # 1 Ancient = 8 Chaos
+        'regal': 3,             # 1 Regal = 3 Chaos
+        'alchemy': 1.5,         # 1 Alchemy = 1.5 Chaos
+        'fusing': 0.4,          # 1 Fusing = 0.4 Chaos
+        'chromatic': 0.2,       # 1 Chromatic = 0.2 Chaos
+        'chaos': 1              # 1 Chaos = 1 Chaos (基准)
+    }
+    
+    # 角色职业
+    CHARACTER_CLASSES = {
+        'witch': 'Witch',
+        'ranger': 'Ranger', 
+        'warrior': 'Warrior',
+        'monk': 'Monk',
+        'sorceress': 'Sorceress',
+        'mercenary': 'Mercenary'
+    }
+    
+    # 升华职业映射
+    ASCENDANCY_MAPPING = {
+        'Witch': ['Infernalist', 'Blood Mage', 'Chronomancer'],
+        'Ranger': ['Deadeye', 'Pathfinder', 'Beastmaster'], 
+        'Warrior': ['Titan', 'Warbringer'],
+        'Monk': ['Invoker', 'Acolyte'],
+        'Sorceress': ['Stormweaver', 'Templar'],
+        'Mercenary': ['Witchhunter', 'Gemling Legionnaire']
+    }
+    
+    # 装备槽位
+    EQUIPMENT_SLOTS = [
+        'weapon_main_hand',
+        'weapon_off_hand', 
+        'helmet',
+        'body_armour',
+        'gloves',
+        'boots',
+        'ring_1',
+        'ring_2',
+        'amulet',
+        'belt',
+        'jewel_1',
+        'jewel_2',
+        'jewel_3',
+        'jewel_4'
+    ]
+    
+    # 伤害类型
+    DAMAGE_TYPES = [
+        'physical',
+        'fire', 
+        'cold',
+        'lightning',
+        'chaos'
+    ]
+    
+    # 防御类型
+    DEFENSE_TYPES = [
+        'armour',
+        'evasion',
+        'energy_shield'
+    ]
+
+# PoE2特定的验证规则
+class PoE2Validators:
+    """PoE2数据验证规则"""
+    
+    @staticmethod
+    def validate_resistance(value: float, res_type: str) -> bool:
+        """验证抗性值"""
+        if res_type == 'chaos':
+            return -100 <= value <= PoE2Constants.MAX_RESISTANCE
+        else:
+            return -60 <= value <= PoE2Constants.MAX_RESISTANCE
+            
+    @staticmethod
+    def validate_character_class(class_name: str) -> bool:
+        """验证角色职业"""
+        return class_name.lower() in PoE2Constants.CHARACTER_CLASSES
+        
+    @staticmethod
+    def validate_ascendancy(class_name: str, ascendancy: str) -> bool:
+        """验证升华职业"""
+        if class_name not in PoE2Constants.ASCENDANCY_MAPPING:
+            return False
+        return ascendancy in PoE2Constants.ASCENDANCY_MAPPING[class_name]
+        
+    @staticmethod
+    def validate_currency_amount(currency: str, amount: float) -> bool:
+        """验证货币数量"""
+        return (currency in PoE2Constants.CURRENCY_CHAOS_VALUES and 
+                0 <= amount <= 999999)
+
+# PoE2计算辅助函数
+class PoE2Calculations:
+    """PoE2游戏机制计算"""
+    
+    @staticmethod
+    def calculate_total_life(level: int, strength: int, life_from_gear: int, 
+                           life_from_passives: int) -> int:
+        """计算总生命值"""
+        base_life = PoE2Constants.BASE_LIFE_START + \
+                   (level - 1) * PoE2Constants.BASE_LIFE_PER_LEVEL
+        strength_life = strength * PoE2Constants.LIFE_PER_STRENGTH
+        
+        return int(base_life + strength_life + life_from_gear + life_from_passives)
+        
+    @staticmethod
+    def calculate_total_mana(level: int, intelligence: int, mana_from_gear: int,
+                           mana_from_passives: int) -> int:
+        """计算总法力值"""
+        base_mana = PoE2Constants.BASE_MANA_START + \
+                   (level - 1) * PoE2Constants.BASE_MANA_PER_LEVEL
+        int_mana = intelligence * PoE2Constants.MANA_PER_INTELLIGENCE
+        
+        return int(base_mana + int_mana + mana_from_gear + mana_from_passives)
+        
+    @staticmethod
+    def calculate_effective_health_pool(life: int, energy_shield: int, 
+                                      resistances: Dict[str, float]) -> float:
+        """计算有效生命池(考虑抗性)"""
+        # 计算平均抗性减伤
+        avg_resistance = sum(resistances.values()) / len(resistances)
+        damage_taken_multiplier = (100 - avg_resistance) / 100
+        
+        # 有效生命池 = (生命 + 能量护盾) / 承受伤害倍率
+        return (life + energy_shield) / damage_taken_multiplier
+        
+    @staticmethod
+    def convert_currency_to_chaos(amount: float, currency_type: str) -> float:
+        """将货币转换为混沌石等值"""
+        if currency_type not in PoE2Constants.CURRENCY_CHAOS_VALUES:
+            raise ValueError(f"Unknown currency type: {currency_type}")
+            
+        return amount * PoE2Constants.CURRENCY_CHAOS_VALUES[currency_type]
+        
+    @staticmethod
+    def estimate_build_cost_tier(total_chaos_cost: float) -> str:
+        """估算构筑成本等级"""
+        if total_chaos_cost <= 50:
+            return "league_start"      # 赛季初
+        elif total_chaos_cost <= 200:
+            return "budget"           # 平民
+        elif total_chaos_cost <= 800:
+            return "medium"           # 中档
+        elif total_chaos_cost <= 2500:
+            return "expensive"        # 昂贵
+        else:
+            return "mirror_tier"      # 镜子级
+```
+
+## 25.3 数据验证工具
+
+### 通用验证框架
+```python
+# src/poe2build/utils/data_validation.py
+
+import re
+import json
+from typing import Any, Dict, List, Optional, Union, Callable
+from pydantic import BaseModel, validator
+from .poe2_constants import PoE2Validators, PoE2Constants
+
+class ValidationResult:
+    """验证结果"""
+    
+    def __init__(self, is_valid: bool, errors: List[str] = None):
+        self.is_valid = is_valid
+        self.errors = errors or []
+        
+    def add_error(self, error: str):
+        """添加错误信息"""
+        self.errors.append(error)
+        self.is_valid = False
+        
+    def __bool__(self):
+        return self.is_valid
+
+class PoE2DataValidator:
+    """PoE2专用数据验证器"""
+    
+    @staticmethod
+    def validate_build_data(build_data: Dict[str, Any]) -> ValidationResult:
+        """验证构筑数据完整性"""
+        result = ValidationResult(True)
+        
+        # 必需字段检查
+        required_fields = ['class', 'level', 'skills', 'equipment']
+        for field in required_fields:
+            if field not in build_data:
+                result.add_error(f"Missing required field: {field}")
+                
+        # 角色职业验证
+        if 'class' in build_data:
+            if not PoE2Validators.validate_character_class(build_data['class']):
+                result.add_error(f"Invalid character class: {build_data['class']}")
+                
+        # 升华职业验证
+        if 'ascendancy' in build_data and 'class' in build_data:
+            if not PoE2Validators.validate_ascendancy(
+                build_data['class'], build_data['ascendancy']):
+                result.add_error(
+                    f"Invalid ascendancy {build_data['ascendancy']} "
+                    f"for class {build_data['class']}"
+                )
+                
+        # 等级验证
+        if 'level' in build_data:
+            level = build_data['level']
+            if not isinstance(level, int) or not (1 <= level <= 100):
+                result.add_error(f"Invalid level: {level}. Must be 1-100")
+                
+        # 抗性验证
+        if 'resistances' in build_data:
+            resistances = build_data['resistances']
+            for res_type, value in resistances.items():
+                if not PoE2Validators.validate_resistance(value, res_type):
+                    result.add_error(
+                        f"Invalid {res_type} resistance: {value}. "
+                        f"Max is {PoE2Constants.MAX_RESISTANCE}%"
+                    )
+                    
+        return result
+        
+    @staticmethod
+    def validate_equipment_data(equipment: Dict[str, Any]) -> ValidationResult:
+        """验证装备数据"""
+        result = ValidationResult(True)
+        
+        # 检查槽位有效性
+        for slot, item in equipment.items():
+            if slot not in PoE2Constants.EQUIPMENT_SLOTS:
+                result.add_error(f"Invalid equipment slot: {slot}")
+                
+            # 验证物品数据结构
+            if item and isinstance(item, dict):
+                if 'name' not in item:
+                    result.add_error(f"Item in slot {slot} missing name")
+                    
+        return result
+        
+    @staticmethod
+    def validate_market_data(market_data: Dict[str, Any]) -> ValidationResult:
+        """验证市场数据"""
+        result = ValidationResult(True)
+        
+        required_fields = ['item_name', 'price', 'currency', 'timestamp']
+        for field in required_fields:
+            if field not in market_data:
+                result.add_error(f"Missing market data field: {field}")
+                
+        # 货币验证
+        if 'currency' in market_data:
+            currency = market_data['currency']
+            if currency not in PoE2Constants.CURRENCY_CHAOS_VALUES:
+                result.add_error(f"Invalid currency type: {currency}")
+                
+        # 价格验证
+        if 'price' in market_data:
+            price = market_data['price']
+            if not isinstance(price, (int, float)) or price < 0:
+                result.add_error(f"Invalid price: {price}")
+                
+        return result
+
+class SchemaValidator:
+    """JSON Schema验证器"""
+    
+    def __init__(self):
+        self.schemas = self._load_schemas()
+        
+    def _load_schemas(self) -> Dict[str, Dict]:
+        """加载验证模式"""
+        return {
+            'build_request': {
+                'type': 'object',
+                'required': ['preferences'],
+                'properties': {
+                    'preferences': {
+                        'type': 'object',
+                        'required': ['class'],
+                        'properties': {
+                            'class': {'type': 'string'},
+                            'ascendancy': {'type': 'string'},
+                            'style': {'type': 'string'},
+                            'goal': {'type': 'string'},
+                            'budget': {
+                                'type': 'object',
+                                'properties': {
+                                    'amount': {'type': 'number'},
+                                    'currency': {'type': 'string'}
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+    def validate_against_schema(self, data: Any, schema_name: str) -> ValidationResult:
+        """根据模式验证数据"""
+        # 这里可以集成jsonschema库进行更复杂的验证
+        # 简化实现
+        result = ValidationResult(True)
+        
+        if schema_name not in self.schemas:
+            result.add_error(f"Unknown schema: {schema_name}")
+            return result
+            
+        # 基础类型检查
+        schema = self.schemas[schema_name]
+        if not self._validate_type(data, schema):
+            result.add_error("Data does not match schema type")
+            
+        return result
+        
+    def _validate_type(self, data: Any, schema: Dict) -> bool:
+        """验证数据类型"""
+        expected_type = schema.get('type')
+        
+        if expected_type == 'object':
+            return isinstance(data, dict)
+        elif expected_type == 'array':
+            return isinstance(data, list)
+        elif expected_type == 'string':
+            return isinstance(data, str)
+        elif expected_type == 'number':
+            return isinstance(data, (int, float))
+        elif expected_type == 'boolean':
+            return isinstance(data, bool)
+        else:
+            return True  # 未知类型，跳过验证
+
+# 验证装饰器
+def validate_input(validator_func: Callable) -> Callable:
+    """输入验证装饰器"""
+    
+    def decorator(func: Callable) -> Callable:
+        def wrapper(*args, **kwargs):
+            # 假设第一个参数是要验证的数据
+            if args:
+                validation_result = validator_func(args[0])
+                if not validation_result:
+                    raise ValueError(f"Validation failed: {validation_result.errors}")
+                    
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+# 使用示例装饰器
+@validate_input(PoE2DataValidator.validate_build_data)
+def process_build_data(build_data: Dict[str, Any]):
+    """处理构筑数据（带输入验证）"""
+    # 实际处理逻辑
+    pass
+```
+
+## 25.4 文本处理工具
+
+### PoE2特定文本处理
+```python
+# src/poe2build/utils/text_processing.py
+
+import re
+import unicodedata
+from typing import List, Dict, Optional, Set
+from difflib import SequenceMatcher
+
+class PoE2TextProcessor:
+    """PoE2专用文本处理工具"""
+    
+    # PoE2物品名称清理正则
+    ITEM_NAME_PATTERNS = {
+        'rarity_prefix': re.compile(r'^(Normal|Magic|Rare|Unique|Currency)\s+'),
+        'socket_info': re.compile(r'\s+\(\d+[RGBW]-\d+[RGBW].*?\)$'),
+        'quality_info': re.compile(r'\s+\(Quality:\s*\+?\d+%\)$'),
+        'level_req': re.compile(r'\s+\(Level\s+\d+\)$'),
+        'corrupted': re.compile(r'\s+\(Corrupted\)$')
+    }
+    
+    # PoE2技能名称模式
+    SKILL_PATTERNS = {
+        'support_gem': re.compile(r'\s+Support$'),
+        'aura_skill': re.compile(r'^(Grace|Hatred|Anger|Wrath|Discipline|Clarity)\b'),
+        'curse_skill': re.compile(r'(Curse|Hex|Mark)$')
+    }
+    
+    @classmethod
+    def clean_item_name(cls, item_name: str) -> str:
+        """清理物品名称，移除多余信息"""
+        if not item_name:
+            return ""
+            
+        cleaned = item_name.strip()
+        
+        # 应用清理模式
+        for pattern_name, pattern in cls.ITEM_NAME_PATTERNS.items():
+            cleaned = pattern.sub('', cleaned)
+            
+        return cleaned.strip()
+        
+    @classmethod
+    def normalize_skill_name(cls, skill_name: str) -> str:
+        """标准化技能名称"""
+        if not skill_name:
+            return ""
+            
+        normalized = skill_name.strip()
+        
+        # 移除常见后缀
+        normalized = cls.SKILL_PATTERNS['support_gem'].sub('', normalized)
+        
+        # 标准化大小写
+        normalized = ' '.join(word.capitalize() for word in normalized.split())
+        
+        return normalized
+        
+    @classmethod
+    def extract_numeric_values(cls, text: str) -> Dict[str, float]:
+        """从文本中提取数值"""
+        # 常见的数值模式
+        patterns = {
+            'percentage': re.compile(r'(\d+(?:\.\d+)?)\s*%'),
+            'flat_value': re.compile(r'(\d+(?:\.\d+)?)\s+to\s+(\d+(?:\.\d+)?)'),
+            'single_number': re.compile(r'\b(\d+(?:\.\d+)?)\b'),
+            'range': re.compile(r'(\d+(?:\.\d+)?)-(\d+(?:\.\d+)?)')
+        }
+        
+        results = {}
+        
+        for pattern_name, pattern in patterns.items():
+            matches = pattern.findall(text)
+            if matches:
+                if pattern_name == 'flat_value':
+                    # 返回范围的平均值
+                    results[pattern_name] = [
+                        (float(match[0]) + float(match[1])) / 2 
+                        for match in matches
+                    ]
+                elif pattern_name == 'range':
+                    results[pattern_name] = [
+                        (float(match[0]) + float(match[1])) / 2
+                        for match in matches  
+                    ]
+                else:
+                    results[pattern_name] = [float(match) for match in matches]
+                    
+        return results
+        
+    @classmethod
+    def calculate_text_similarity(cls, text1: str, text2: str) -> float:
+        """计算两个文本的相似度"""
+        if not text1 or not text2:
+            return 0.0
+            
+        # 标准化文本
+        norm_text1 = cls._normalize_text(text1)
+        norm_text2 = cls._normalize_text(text2)
+        
+        # 使用序列匹配计算相似度
+        return SequenceMatcher(None, norm_text1, norm_text2).ratio()
+        
+    @classmethod
+    def _normalize_text(cls, text: str) -> str:
+        """标准化文本用于比较"""
+        # 转为小写
+        normalized = text.lower()
+        
+        # 移除Unicode组合字符
+        normalized = unicodedata.normalize('NFKD', normalized)
+        
+        # 移除标点符号和多余空格
+        normalized = re.sub(r'[^\w\s]', ' ', normalized)
+        normalized = re.sub(r'\s+', ' ', normalized).strip()
+        
+        return normalized
+        
+    @classmethod
+    def fuzzy_search(cls, query: str, candidates: List[str], 
+                    threshold: float = 0.6) -> List[tuple]:
+        """模糊搜索"""
+        if not query or not candidates:
+            return []
+            
+        results = []
+        for candidate in candidates:
+            similarity = cls.calculate_text_similarity(query, candidate)
+            if similarity >= threshold:
+                results.append((candidate, similarity))
+                
+        # 按相似度排序
+        results.sort(key=lambda x: x[1], reverse=True)
+        return results
+        
+    @classmethod
+    def extract_build_tags(cls, build_description: str) -> Set[str]:
+        """从构筑描述中提取标签"""
+        if not build_description:
+            return set()
+            
+        # 预定义的标签模式
+        tag_patterns = {
+            'damage_type': re.compile(r'\b(physical|fire|cold|lightning|chaos)\b', re.I),
+            'build_style': re.compile(r'\b(bow|spell|melee|minion|totem)\b', re.I),
+            'defense': re.compile(r'\b(life|es|hybrid|armor|evasion)\b', re.I),
+            'budget': re.compile(r'\b(budget|cheap|expensive|mirror)\b', re.I),
+            'difficulty': re.compile(r'\b(beginner|easy|medium|hard|expert)\b', re.I)
+        }
+        
+        tags = set()
+        for category, pattern in tag_patterns.items():
+            matches = pattern.findall(build_description)
+            for match in matches:
+                tags.add(f"{category}:{match.lower()}")
+                
+        return tags
+
+class TextTemplate:
+    """文本模板处理器"""
+    
+    def __init__(self, template: str):
+        self.template = template
+        self.variables = self._extract_variables()
+        
+    def _extract_variables(self) -> Set[str]:
+        """提取模板变量"""
+        return set(re.findall(r'\{(\w+)\}', self.template))
+        
+    def render(self, **kwargs) -> str:
+        """渲染模板"""
+        try:
+            return self.template.format(**kwargs)
+        except KeyError as e:
+            raise ValueError(f"Missing template variable: {e}")
+            
+    def validate_variables(self, **kwargs) -> List[str]:
+        """验证模板变量"""
+        missing = []
+        for var in self.variables:
+            if var not in kwargs:
+                missing.append(var)
+        return missing
+
+# 预定义的PoE2文本模板
+POE2_TEXT_TEMPLATES = {
+    'build_summary': TextTemplate(
+        "{class_name} {ascendancy} - {main_skill}\n"
+        "预估DPS: {estimated_dps:,}\n"
+        "生命: {total_life:,} | 能量护盾: {energy_shield:,}\n"
+        "预算: {total_cost} {currency}"
+    ),
+    'item_description': TextTemplate(
+        "{item_name} ({item_type})\n"
+        "价格: {price} {currency}\n"
+        "品质: {quality}%\n"
+        "{modifiers}"
+    ),
+    'error_message': TextTemplate(
+        "错误: {error_type}\n"
+        "详细信息: {error_details}\n"
+        "建议: {suggestion}"
+    )
+}
+```
+
+请继续实现src/poe2build/utils/目录下的其他工具模块，确保提供完整的辅助功能支持。
+
+要求：
+1. 所有常量和验证规则必须符合PoE2游戏机制
+2. 文本处理要考虑PoE2物品和技能的命名规则
+3. 提供充分的错误处理和验证功能
+4. 工具函数要高度可重用和模块化

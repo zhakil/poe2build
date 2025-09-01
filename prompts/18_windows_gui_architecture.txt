@@ -1,0 +1,361 @@
+请设计并实现PoE2智能构筑生成器的Windows桌面GUI应用架构：
+
+## 18.1 技术栈分析与选择
+
+### GUI框架深度分析
+1. **PyQt6 (推荐选择)**
+   - 优势：
+     - 成熟稳定的商业级GUI框架
+     - 丰富的原生控件和布局管理
+     - 优秀的自定义绘制能力 (适合PoE2主题)
+     - 完善的多线程支持 (避免UI冻结)
+     - 专业的图表和可视化组件
+     - 原生Windows集成支持
+   - 劣势：
+     - 较大的依赖文件
+     - 学习曲线相对陡峭
+   - 适用性评分：9.5/10
+
+2. **CustomTkinter (备选方案)**
+   - 优势：
+     - 现代化的Tkinter增强版本
+     - 内置深色主题支持
+     - 轻量级，易于部署
+     - 简单易学的API
+   - 劣势：
+     - 自定义能力有限
+     - 高级组件较少
+     - 性能相对较低
+   - 适用性评分：7.5/10
+
+3. **标准Tkinter (不推荐)**
+   - 优势：Python内置，无额外依赖
+   - 劣势：外观陈旧，不适合游戏工具美学
+   - 适用性评分：4/10
+
+### 最终技术栈选择
+**主要框架**: PyQt6
+**附加库**:
+- QDarkStyle (深色主题)
+- QtCharts (数据可视化)  
+- QSystemTrayIcon (系统托盘)
+- QSettings (配置存储)
+
+## 18.2 整体架构设计
+
+### 应用程序架构模式
+采用 **MVP (Model-View-Presenter) + 分层架构**：
+
+```
+┌─────────────────── Presentation Layer ───────────────────┐
+│  ┌─── Views (PyQt6 Widgets) ───┐  ┌─── Presenters ───┐   │
+│  │ • MainWindow                │  │ • MainPresenter  │   │
+│  │ • BuildFormWidget           │  │ • BuildPresenter │   │
+│  │ • ResultDisplayWidget       │  │ • UIController   │   │
+│  │ • SettingsDialog            │  │                  │   │
+│  └─────────────────────────────┘  └──────────────────┘   │
+└───────────────────────────────────────────────────────────┘
+┌─────────────────── Business Layer ────────────────────────┐
+│  ┌─── GUI Services ───────────┐  ┌─── Integration ──────┐ │
+│  │ • WindowManager            │  │ • PoE2Orchestrator   │ │
+│  │ • ThemeManager             │  │   Integration        │ │
+│  │ • NotificationService      │  │ • DataFlowManager    │ │
+│  │ • ConfigurationManager     │  │ • AsyncTaskManager   │ │
+│  └────────────────────────────┘  └──────────────────────┘ │
+└───────────────────────────────────────────────────────────┘
+┌─────────────────── Data Layer ─────────────────────────────┐
+│  ┌─── Existing Backend ───────┐  ┌─── GUI Data ──────────┐ │
+│  │ • PoE2AIOrchestrator       │  │ • UserPreferences     │ │
+│  │ • RAG System               │  │ • WindowStates        │ │
+│  │ • PoB2Integration          │  │ • RecentBuilds        │ │
+│  │ • Data Sources             │  │ • UICache             │ │
+│  └────────────────────────────┘  └───────────────────────┘ │
+└───────────────────────────────────────────────────────────┘
+```
+
+### 项目文件结构
+```
+E:\zhakil\github\poe2build\
+├── src/poe2build/gui/                  # GUI应用模块
+│   ├── __init__.py
+│   ├── app.py                          # PyQt6应用程序主入口
+│   ├── main_window.py                  # 主窗口实现
+│   ├── views/                          # 视图层组件
+│   │   ├── __init__.py
+│   │   ├── base_view.py                # 基础视图类
+│   │   ├── build_form_view.py          # 构筑配置表单
+│   │   ├── result_display_view.py      # 结果展示视图
+│   │   ├── settings_view.py            # 设置界面
+│   │   ├── status_view.py              # 状态监控视图
+│   │   └── about_view.py               # 关于对话框
+│   ├── presenters/                     # 展示器层
+│   │   ├── __init__.py
+│   │   ├── main_presenter.py           # 主窗口展示器
+│   │   ├── build_presenter.py          # 构筑生成展示器
+│   │   └── ui_controller.py            # UI控制协调器
+│   ├── components/                     # 自定义组件
+│   │   ├── __init__.py
+│   │   ├── poe2_theme.py               # PoE2主题组件
+│   │   ├── build_card.py               # 构筑展示卡片
+│   │   ├── stat_display.py             # 统计数据展示
+│   │   ├── class_selector.py           # 职业选择器
+│   │   ├── progress_overlay.py         # 进度遮罩
+│   │   └── notification_widget.py      # 通知组件
+│   ├── services/                       # GUI业务服务
+│   │   ├── __init__.py
+│   │   ├── window_manager.py           # 窗口管理服务
+│   │   ├── theme_manager.py            # 主题管理服务
+│   │   ├── config_service.py           # 配置管理服务
+│   │   ├── notification_service.py     # 通知服务
+│   │   └── system_integration.py       # 系统集成服务
+│   ├── integration/                    # 后端集成层
+│   │   ├── __init__.py
+│   │   ├── orchestrator_client.py      # PoE2AIOrchestrator集成
+│   │   ├── async_worker.py             # 异步任务处理
+│   │   └── data_flow_manager.py        # 数据流管理
+│   ├── resources/                      # 资源文件
+│   │   ├── __init__.py
+│   │   ├── themes/                     # 主题资源
+│   │   │   ├── poe2_dark.qss          # PoE2深色主题样式
+│   │   │   ├── poe2_light.qss         # PoE2亮色主题样式
+│   │   │   └── custom_styles.qss       # 自定义样式
+│   │   ├── icons/                      # 图标资源
+│   │   │   ├── app_icon.ico           # 应用图标
+│   │   │   ├── class_icons/           # 职业图标
+│   │   │   ├── skill_icons/           # 技能图标
+│   │   │   └── ui_icons/              # UI图标
+│   │   ├── images/                     # 图片资源
+│   │   │   ├── backgrounds/           # 背景图片
+│   │   │   ├── decorations/           # 装饰元素
+│   │   │   └── splash_screen.png      # 启动画面
+│   │   └── fonts/                      # 字体文件
+│   │       └── poe2_ui.ttf            # PoE2风格字体
+│   └── utils/                          # GUI工具类
+│       ├── __init__.py
+│       ├── qt_helpers.py               # PyQt6辅助函数
+│       ├── ui_validators.py            # UI输入验证
+│       ├── animation_helpers.py        # 动画辅助
+│       └── system_utils.py             # 系统工具
+├── gui_main.py                         # GUI应用启动脚本
+├── requirements_gui.txt                # GUI专用依赖
+└── packaging/                          # 打包配置
+    ├── gui_setup.py                    # PyInstaller配置
+    ├── app_icon.ico                    # 应用图标
+    ├── installer_config.iss            # Inno Setup配置
+    └── sign_app.bat                    # 数字签名脚本
+```
+
+## 18.3 PoE2主题设计标准
+
+### 色彩规范
+```python
+POE2_THEME_COLORS = {
+    'primary_bg': '#0a0a0a',         # 深黑背景
+    'secondary_bg': '#1a1a1a',       # 次级背景
+    'panel_bg': '#2a2a2a',           # 面板背景
+    'accent_gold': '#c9aa71',        # PoE2金色强调
+    'accent_blue': '#4a9eff',        # 蓝色强调
+    'accent_red': '#e74c3c',         # 红色警告
+    'text_primary': '#f0f0f0',       # 主要文字
+    'text_secondary': '#cccccc',     # 次要文字
+    'text_disabled': '#666666',      # 禁用文字
+    'border_normal': '#444444',      # 普通边框
+    'border_active': '#c9aa71',      # 活动边框
+    'border_focus': '#4a9eff',       # 焦点边框
+}
+```
+
+### UI元素设计规范
+1. **窗口边框**：2px金色装饰边框 + 阴影效果
+2. **按钮设计**：圆角矩形 + 渐变背景 + hover动效
+3. **输入框**：深色背景 + 金色边框 + 内阴影
+4. **卡片设计**：深色背景 + 细边框 + 轻微圆角
+5. **图标风格**：线条简洁 + 金色填充 + 16x16/24x24尺寸
+
+### 字体层级
+```css
+/* 主标题 */
+h1: 24px, 粗体, 金色
+/* 副标题 */
+h2: 18px, 半粗体, 白色
+/* 正文 */
+body: 14px, 常规, 浅灰
+/* 小字 */
+small: 12px, 常规, 灰色
+/* 强调 */
+emphasis: 14px, 粗体, 蓝色
+```
+
+## 18.4 核心功能模块设计
+
+### 主窗口 (MainWindow)
+1. **布局结构**：
+   - 顶部：菜单栏 + 工具栏
+   - 左侧：导航面板 (树形菜单)
+   - 中心：主要内容区域 (堆叠widget)
+   - 右侧：快速信息面板
+   - 底部：状态栏 + 进度条
+
+2. **核心功能**：
+   - 构筑生成向导
+   - 结果展示和分析
+   - 系统设置和配置
+   - 帮助和文档
+
+### 构筑生成器 (BuildGeneratorWidget)
+1. **分步向导界面**：
+   - Step 1: 职业和天赋选择
+   - Step 2: 构筑目标设定
+   - Step 3: 预算和装备约束
+   - Step 4: 高级选项配置
+   - Step 5: 生成和结果展示
+
+2. **智能提示系统**：
+   - 实时输入验证
+   - 智能推荐提示
+   - 配置冲突检测
+   - 最佳实践建议
+
+### 结果展示系统 (ResultDisplayWidget)
+1. **多视图展示**：
+   - 卡片视图：简洁构筑概览
+   - 列表视图：详细参数对比
+   - 图表视图：数据可视化分析
+   - 树状视图：技能树展示
+
+2. **交互功能**：
+   - 构筑收藏和标签
+   - 一键导出到PoB2
+   - 社区分享功能
+   - 打印和保存报告
+
+## 18.5 Windows系统集成
+
+### 原生Windows特性
+1. **系统托盘集成**：
+   - 最小化到托盘
+   - 快速操作菜单
+   - 状态指示器
+   - 通知消息
+
+2. **Windows任务栏**：
+   - 进度条显示
+   - 跳转列表 (Jump List)
+   - 缩略图预览
+   - 任务栏按钮状态
+
+3. **文件关联**：
+   - .poe2build文件类型注册
+   - 右键菜单集成
+   - 拖放支持
+   - Windows资源管理器集成
+
+4. **系统通知**：
+   - Windows 10/11 原生通知
+   - Toast通知样式
+   - 操作按钮集成
+   - 通知中心历史
+
+## 18.6 性能和用户体验优化
+
+### 性能目标
+- **启动时间** < 3秒 (包括splash screen)
+- **内存占用** < 200MB (空闲状态)
+- **响应时间** < 100ms (UI操作响应)
+- **构筑生成** < 30秒 (包括进度反馈)
+
+### 优化策略
+1. **启动优化**：
+   - 延迟加载非关键组件
+   - 多线程初始化
+   - 预编译UI资源
+   - 智能缓存策略
+
+2. **内存管理**：
+   - 及时释放不用的数据
+   - 图片资源按需加载
+   - UI组件复用池
+   - 垃圾回收优化
+
+3. **响应性保证**：
+   - UI操作与计算分离
+   - 异步任务队列
+   - 进度反馈机制
+   - 用户操作优先级
+
+## 18.7 错误处理和稳定性
+
+### 错误处理策略
+1. **分级错误处理**：
+   - 致命错误：显示错误对话框，安全退出
+   - 业务错误：Toast提示，功能降级
+   - 警告信息：状态栏提示，日志记录
+   - 调试信息：开发者模式显示
+
+2. **异常恢复机制**：
+   - 自动保存用户数据
+   - 异常状态自动恢复
+   - 网络中断处理
+   - 后端服务重连
+
+3. **稳定性保障**：
+   - 关键操作确认对话框
+   - 数据备份和恢复
+   - 配置文件验证
+   - 运行时健康检查
+
+## 18.8 开发和调试支持
+
+### 开发者工具
+1. **调试模式**：
+   - 详细日志输出
+   - 性能监控面板
+   - UI边界显示
+   - 内存使用统计
+
+2. **配置系统**：
+   - 开发/生产环境切换
+   - 功能开关配置
+   - 主题切换支持
+   - API端点配置
+
+3. **测试支持**：
+   - 模拟数据模式
+   - UI自动化测试钩子
+   - 性能基准测试
+   - 压力测试工具
+
+## 18.9 实现步骤规划
+
+### Phase 1: 基础架构 (3天)
+- PyQt6项目基础搭建
+- 主窗口和基础布局
+- PoE2主题系统实现
+- 基础组件开发
+
+### Phase 2: 核心功能 (4天)  
+- 构筑生成向导实现
+- 与后端系统集成
+- 结果展示系统
+- 数据流和状态管理
+
+### Phase 3: Windows集成 (2天)
+- 系统托盘功能
+- 文件关联处理
+- 系统通知集成
+- 注册表配置
+
+### Phase 4: 优化和打包 (2天)
+- 性能优化调试
+- 错误处理完善
+- 打包配置和测试
+- 安装程序制作
+
+请确保GUI架构设计：
+1. 充分利用PyQt6的强大功能
+2. 提供专业级的PoE2主题体验
+3. 与现有后端系统无缝集成
+4. 符合Windows应用的用户体验标准
+5. 具备良好的扩展性和维护性
+
+实现时重点关注PoE2玩家的使用习惯，提供直观的构筑配置界面和详细的数据分析展示，确保应用既专业又易用。
