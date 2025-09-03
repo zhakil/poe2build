@@ -1,0 +1,77 @@
+[
+  {
+    "pattern_id": "ranger_deadeye_lightning_arrow_clear_speed",
+    "pattern_name": "Ranger Lightning Arrow (clear_speed)",
+    "core_elements": {
+      "character_class": "Ranger",
+      "ascendancy": "Deadeye",
+      "main_skill": "Lightning Arrow",
+      "build_goal": "clear_speed"
+    },
+    "variations": [],
+    "success_rate": 0.6,
+    "popularity_score": 0.3333333333333333,
+    "difficulty_level": "中等难度",
+    "investment_tier": "中投资",
+    "first_seen": "2025-09-01T11:48:21.252344",
+    "last_updated": "2025-09-01T11:48:21.252344",
+    "trend": "stable",
+    "sample_builds": [
+      "7e002815c35014ea",
+      "7e002815c35014ea",
+      "7e002815c35014ea",
+      "7e002815c35014ea",
+      "7e002815c35014ea"
+    ]
+  },
+  {
+    "pattern_id": "witch_elementalist_fireball_boss_killing",
+    "pattern_name": "Witch Fireball (boss_killing)",
+    "core_elements": {
+      "character_class": "Witch",
+      "ascendancy": "Elementalist",
+      "main_skill": "Fireball",
+      "build_goal": "boss_killing"
+    },
+    "variations": [],
+    "success_rate": 0.4,
+    "popularity_score": 0.3333333333333333,
+    "difficulty_level": "中等难度",
+    "investment_tier": "中投资",
+    "first_seen": "2025-09-01T11:48:21.252344",
+    "last_updated": "2025-09-01T11:48:21.252344",
+    "trend": "stable",
+    "sample_builds": [
+      "6903cbac1d71c0a6",
+      "6903cbac1d71c0a6",
+      "6903cbac1d71c0a6",
+      "6903cbac1d71c0a6",
+      "6903cbac1d71c0a6"
+    ]
+  },
+  {
+    "pattern_id": "marauder_juggernaut_earthquake_balanced",
+    "pattern_name": "Marauder Earthquake (balanced)",
+    "core_elements": {
+      "character_class": "Marauder",
+      "ascendancy": "Juggernaut",
+      "main_skill": "Earthquake",
+      "build_goal": "balanced"
+    },
+    "variations": [],
+    "success_rate": 0.6,
+    "popularity_score": 0.3333333333333333,
+    "difficulty_level": "中等难度",
+    "investment_tier": "中投资",
+    "first_seen": "2025-09-01T11:48:21.252344",
+    "last_updated": "2025-09-01T11:48:21.252344",
+    "trend": "stable",
+    "sample_builds": [
+      "b7c4685f84a78a68",
+      "b7c4685f84a78a68",
+      "b7c4685f84a78a68",
+      "b7c4685f84a78a68",
+      "b7c4685f84a78a68"
+    ]
+  }
+]

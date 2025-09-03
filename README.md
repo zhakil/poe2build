@@ -1,40 +1,52 @@
-# PoE2 智能构筑生成器
+# PoE2 四大数据源集成智能构筑系统
 
-> 基于真实PoE2数据源的智能构筑推荐系统 - 集成PoB2计算引擎和RAG增强AI
+> 基于真实PoE2数据源的智能构筑推荐系统 - 集成四大核心数据源、RAG增强AI和PoB2高度集成
 
 [![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://python.org)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![PoE2 Specific](https://img.shields.io/badge/PoE2%20Specific-100%25-orange)](docs/README.md)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/zhakil/poe2build)
 
-## 项目概览
+## 🎯 **四大核心数据源架构 (Foundation)**
 
-**PoE2智能构筑生成器** 是专为《流放之路2》设计的智能构筑推荐系统。集成**真实可用的PoE2数据源**，基于Path of Building Community (PoB2)计算引擎，使用RAG增强AI技术生成专业构筑方案。
+**本项目完全基于以下四个真实、可用的PoE2数据源构建:**
 
-### 核心特性
-- **🤖 AI驱动推荐** - RAG增强的智能构筑生成
-- **⚡ PoB2集成** - 基于Path of Building Community的精确计算
-- **📊 真实数据源** - 集成poe2scout.com、poe2db.tw、poe.ninja
-- **🖥️ 多模式支持** - CLI命令行 + Windows GUI应用
-- **🛡️ PoE2专用** - 支持80%抗性上限、能量护盾等PoE2机制
+### 1. **PoE2Scout API** (https://poe2scout.com)
+- **作用**: 实时市场定价数据和物品价格分析
+- **集成状态**: ✅ 完成
+- **模块**: `src/poe2build/data_sources/poe2scout/`
+- **数据**: ItemPrice, CurrencyExchange, 构筑成本估算
 
-### 数据源集成
-- **[PoE2 Scout](https://poe2scout.com)** - PoE2市场和构筑数据
-- **[PoE2DB](https://poe2db.tw)** - PoE2游戏数据库  
-- **[poe.ninja PoE2专区](https://poe.ninja/poe2/builds)** - PoE2构筑分析
+### 2. **PoE Ninja构筑分析** (https://poe.ninja/poe2/builds)
+- **作用**: Meta趋势分析和流行构筑数据爬取
+- **集成状态**: ✅ 完成
+- **模块**: `src/poe2build/data_sources/ninja/`
+- **数据**: PopularBuild, SkillUsageStats, AscendancyTrend
 
-## 系统要求
+### 3. **Path of Building 2数据** (GitHub/本地)
+- **作用**: 官方游戏数据和精确DPS/EHP计算引擎
+- **集成状态**: ✅ 完成 (支持GitHub和本地双模式)
+- **模块**: `src/poe2build/data_sources/pob2/`
+- **数据**: SkillGem, PassiveNode, BaseItem, 计算引擎
+
+### 4. **PoE2DB游戏数据库** (https://poe2db.tw/cn/)
+- **作用**: 完整游戏数据库和物品详情
+- **集成状态**: ✅ 完成
+- **模块**: `src/poe2build/data_sources/poe2db/`
+- **数据**: 装备属性、技能详情、升华信息、中文本地化
+
+## 📋 系统要求
 
 - **Python**: 3.9 或更高版本
-- **操作系统**: Windows 10/11 (GUI模式), Linux/macOS (CLI模式)
+- **操作系统**: Windows 10/11 (推荐), Linux/macOS (支持)
 - **内存**: 至少4GB RAM (推荐8GB+)
 - **存储**: 至少2GB可用空间
-- **网络**: 稳定互联网连接 (访问PoE2数据源)
-- **可选**: Path of Building Community (PoB2) - 用于本地计算
+- **网络**: 稳定互联网连接 (访问四大数据源)
+- **可选**: Path of Building Community (PoB2) - 用于本地计算增强
 
-## 快速开始
+## 🚀 快速开始
 
-### 1. 项目设置
+### 1. 环境设置
 
 ```bash
 # 克隆项目
@@ -43,545 +55,398 @@ cd poe2build
 
 # 创建虚拟环境
 python -m venv venv
-source venv/bin/activate  # Linux/macOS
-# 或 Windows:
+# Windows:
 venv\Scripts\activate
+# Linux/macOS:
+source venv/bin/activate
 
 # 安装依赖
 pip install -r requirements.txt
 ```
 
-### 2. 环境配置
+### 2. 运行应用
 
 ```bash
-# 复制环境变量模板
-cp .env.example .env
+# 🚀 启动完整功能GUI (强烈推荐)
+python run_complete_gui.py
 
-# 编辑配置文件 (可选)
-# 配置PoE2数据源URL、缓存设置等
-```
+# 或者直接运行GUI
+python gui_apps/poe2_complete_gui.py
 
-### 3. 运行程序
-
-```bash
-# CLI模式 - 快速体验
-python poe2_ai_orchestrator.py
-
-# 交互式推荐
-python poe2_ai_orchestrator.py --interactive
-
-# GUI模式 (Windows)
-python gui_main.py  # 需要完成GUI开发阶段
-```
-
-## 完整构建指南
-
-**重要提示**: 必须严格按照以下顺序构建，每个阶段对应 `prompts/` 目录中的具体指导文件。
-
-### 第一阶段: 项目基础架构 (阶段1-5)
-
-#### 阶段1: 基础配置设置
-```bash
-# 指导文件: prompts/01_foundation_setup.txt
-# 实现目标: 项目基础配置和依赖管理
-
-# 创建文件:
-# ├── pyproject.toml          # Python项目配置
-# ├── requirements.txt        # 核心依赖
-# ├── .env.example           # 环境变量模板  
-# ├── .gitignore            # Git忽略规则
-# └── .pre-commit-config.yaml # Git钩子配置
-
-# 执行命令:
-python -m pip install -e .
-cp .env.example .env
-```
-
-#### 阶段2: 数据模型定义
-```bash  
-# 指导文件: prompts/02_data_models.txt
-# 实现目标: PoE2专用数据模型
-
-# 创建目录结构:
-src/poe2build/models/
-├── __init__.py
-├── build.py              # PoE2Build, PoE2BuildStats模型
-├── characters.py         # PoE2CharacterClass, PoE2Ascendancy
-├── items.py              # PoE2Item, 装备槽位定义
-├── market.py             # 市场数据和价格模型
-└── skills.py             # 技能宝石和辅助宝石模型
-
-# 验证命令:
-python -c "from src.poe2build.models import *; print('Models loaded successfully')"
-```
-
-#### 阶段3: 接口定义
-```bash
-# 指导文件: prompts/03_interfaces.txt  
-# 实现目标: 抽象接口和服务契约
-
-# 创建接口:
-# ├── IDataProvider          # 数据源提供者接口
-# ├── ICalculationEngine     # 计算引擎接口
-# ├── IAIRecommender        # AI推荐器接口
-# └── IResilientService     # 弹性服务接口
-
-# 实现位置: src/poe2build/interfaces/
-```
-
-#### 阶段4: API集成
-```bash
-# 指导文件: prompts/04_api_integration.txt
-# 实现目标: 外部数据源集成
-
-# 实现数据源:
-src/poe2build/data_sources/
-├── __init__.py
-├── poe2_scout_api.py     # PoE2 Scout集成 (poe2scout.com)
-├── poe2db_scraper.py     # PoE2DB集成 (poe2db.tw)
-├── poe_ninja_api.py      # poe.ninja PoE2专区集成
-└── base_data_source.py   # 数据源基类
-
-# 测试命令:
+# 健康检查所有数据源
 python -c "
-from src.poe2build.data_sources import *
-print('Data sources loaded successfully')
+from core_ai_engine.src.poe2build.data_sources import health_check_all_sources
+print(health_check_all_sources())
+"
+
+# RAG训练CLI模式
+python -c "
+from core_ai_engine.src.poe2build.rag.four_sources_integration import train_rag_with_four_sources
+import asyncio
+asyncio.run(train_rag_with_four_sources())
 "
 ```
 
-#### 阶段5: PoB2集成
-```bash
-# 指导文件: prompts/05_pob2_integration.txt
-# 实现目标: Path of Building Community集成
-
-# 实现PoB2接口:
-src/poe2build/pob2/
-├── __init__.py
-├── local_client.py       # PoB2本地客户端
-├── build_importer.py     # PoB2构筑导入器
-├── calculation_engine.py # PoB2计算引擎包装
-└── build_generator.py    # PoB2构筑生成器
-
-# 验证PoB2检测:
-python -c "
-from src.poe2build.pob2 import PoB2LocalClient
-client = PoB2LocalClient()
-print(f'PoB2 detected: {client.is_available()}')
-"
-```
-
-### 第二阶段: 工具和弹性系统 (阶段24-25)
-
-#### 阶段24: 弹性系统架构  
-```bash
-# 指导文件: prompts/24_resilience_system.txt
-# 实现目标: 断路器、重试、缓存等弹性模式
-
-# 实现弹性组件:
-src/poe2build/resilience/
-├── __init__.py
-├── circuit_breaker.py    # 断路器模式
-├── rate_limiter.py       # 速率限制器
-├── retry_handler.py      # 重试处理器  
-├── cache_manager.py      # 缓存管理器
-└── fallback_provider.py  # 降级服务提供者
-
-# 测试弹性功能:
-python -c "
-from src.poe2build.resilience import ResilientService
-print('Resilience system loaded')
-"
-```
-
-#### 阶段25: 工具函数和辅助模块
-```bash
-# 指导文件: prompts/25_utils_helpers.txt
-# 实现目标: PoE2常量、验证工具、文本处理
-
-# 实现工具模块:
-src/poe2build/utils/
-├── __init__.py
-├── poe2_constants.py     # PoE2游戏常量和计算
-├── data_validation.py    # 数据验证工具
-├── text_processing.py    # PoE2文本处理  
-├── math_helpers.py       # 数学计算辅助
-├── file_helpers.py       # 文件操作辅助
-├── network_helpers.py    # 网络请求辅助
-├── logging_config.py     # 日志配置
-└── performance_tools.py  # 性能分析工具
-
-# 验证工具函数:
-python -c "
-from src.poe2build.utils.poe2_constants import PoE2Constants
-print(f'Max resistance: {PoE2Constants.MAX_RESISTANCE}%')
-"
-```
-
-### 第三阶段: RAG和AI系统 (阶段6-11)
-
-#### 阶段6: PoB2计算器
-```bash
-# 指导文件: prompts/06_pob2_calculator.txt
-# 实现目标: PoB2计算引擎集成
-
-# 扩展PoB2功能:
-# ├── DPS计算和统计分析
-# ├── 构筑验证和优化
-# └── 计算结果缓存
-
-# 前置依赖: 阶段5 (PoB2集成)
-```
-
-#### 阶段7: RAG数据收集
-```bash
-# 指导文件: prompts/07_rag_collector.txt  
-# 实现目标: 构筑数据收集和预处理
-
-# 实现RAG数据收集:
-src/poe2build/rag/
-├── __init__.py
-├── data_collector.py     # 数据收集器
-├── build_scraper.py      # 构筑数据爬取
-└── data_preprocessor.py  # 数据预处理
-
-# 前置依赖: 阶段4 (API集成), 阶段24 (弹性系统)
-```
-
-#### 阶段8: RAG向量化
-```bash
-# 指导文件: prompts/08_rag_vectorizer.txt
-# 实现目标: 构筑数据向量化和索引
-
-# 扩展RAG系统:
-src/poe2build/rag/
-├── vectorizer.py         # 向量化引擎
-├── index_builder.py      # 索引构建器
-└── similarity_engine.py  # 相似性搜索
-
-# 前置依赖: 阶段7 (RAG数据收集)
-# 新增依赖: sentence-transformers, faiss-cpu
-```
-
-#### 阶段9: RAG AI引擎  
-```bash
-# 指导文件: prompts/09_rag_ai_engine.txt
-# 实现目标: AI推荐引擎和知识增强
-
-# 实现AI引擎:
-src/poe2build/rag/
-├── ai_engine.py          # AI推荐引擎
-├── knowledge_base.py     # 知识库管理
-└── recommendation.py     # 推荐算法
-
-# 前置依赖: 阶段8 (RAG向量化)
-```
-
-#### 阶段10: AI协调器
-```bash
-# 指导文件: prompts/10_ai_orchestrator.txt
-# 实现目标: 核心AI协调器
-
-# 实现协调器:
-src/poe2build/core/
-├── __init__.py
-├── ai_orchestrator.py    # 主协调器 (PoE2AIOrchestrator)
-├── build_generator.py    # 构筑生成器
-└── recommender.py        # 推荐引擎
-
-# 前置依赖: 阶段1-9 (所有基础组件)
-```
-
-#### 阶段11: 主程序入口
-```bash
-# 指导文件: prompts/11_main_entry.txt
-# 实现目标: CLI主程序和用户接口
-
-# 创建主程序:
-# ├── poe2_ai_orchestrator.py    # 主程序入口
-# ├── CLI参数解析和交互模式
-# └── 使用示例和帮助文档
-
-# 前置依赖: 阶段10 (AI协调器)
-# 测试运行:
-python poe2_ai_orchestrator.py --help
-```
-
-### 第四阶段: 测试和质量保证 (阶段12)
-
-#### 阶段12: 测试套件
-```bash
-# 指导文件: prompts/12_testing_suite.txt
-# 实现目标: 完整测试框架
-
-# 实现测试套件:
-tests/
-├── unit/                 # 单元测试 (70%)
-├── integration/          # 集成测试 (20%)  
-├── performance/          # 性能测试 (10%)
-├── e2e/                  # 端到端测试
-├── fixtures/             # 测试数据
-└── conftest.py          # pytest配置
-
-# 运行测试:
-python -m pytest tests/ -v --cov=src/poe2build
-```
-
-### 第五阶段: 扩展功能 (阶段13-23) - 可选
-
-#### Web架构 (阶段13-17)
-```bash
-# 指导文件: 
-# ├── prompts/13_web_architecture.txt    # Web架构设计
-# ├── prompts/14_fastapi_server.txt      # FastAPI服务器
-# ├── prompts/15_frontend_ui.txt         # 前端UI界面
-# ├── prompts/16_integration_testing.txt # 集成测试
-# └── prompts/17_deployment_web.txt      # Web部署
-
-# 适用场景: 需要Web界面的部署环境
-# 前置依赖: 阶段1-12 (核心功能完成)
-```
-
-#### Windows GUI (阶段18-23)
-```bash
-# 指导文件:
-# ├── prompts/18_windows_gui_architecture.txt  # GUI架构
-# ├── prompts/19_gui_components.txt            # GUI组件
-# ├── prompts/20_main_window.txt               # 主窗口
-# ├── prompts/21_data_integration.txt          # 数据集成
-# ├── prompts/22_windows_features.txt          # Windows特性
-# └── prompts/23_packaging_distribution.txt    # 打包分发
-
-# 适用场景: Windows桌面应用需求
-# 前置依赖: 阶段1-12 (核心功能完成)
-# 新增依赖: PyQt6, pyinstaller
-```
-
-### 构建验证检查点
-
-每完成一个阶段，请运行以下验证命令：
-
-```bash
-# 基础验证 (阶段1-5完成后)
-python -c "
-import src.poe2build
-from src.poe2build.models import *
-from src.poe2build.data_sources import *
-print('✅ 基础架构验证通过')
-"
-
-# 核心功能验证 (阶段6-11完成后)  
-python poe2_ai_orchestrator.py --test-mode
-python -c "
-from src.poe2build.core.ai_orchestrator import PoE2AIOrchestrator
-orchestrator = PoE2AIOrchestrator()
-print('✅ 核心功能验证通过')
-"
-
-# 完整系统验证 (阶段12完成后)
-python -m pytest tests/ --tb=short
-python poe2_ai_orchestrator.py --interactive
-```
-
-## 项目结构
+## 📁 完整项目结构
 
 ```
-poe2build/
-├── poe2_ai_orchestrator.py         # 主程序入口
-├── pyproject.toml                   # Python项目配置
-├── requirements.txt                 # 核心依赖
-├── .env.example                     # 环境变量模板
-├── CLAUDE.md                        # Claude Code指导文档
+poe2build/                              # 项目根目录
+├── 🕷️ 动态数据爬虫系统 (完整真实数据集成)
+│   ├── dynamic_data_crawlers.py        # 🕷️ 四大数据源动态爬虫管理器 (NEW)
+│   ├── pob2_github_downloader.py      # 📥 PoB2 GitHub数据文件下载器 (NEW) 
+│   ├── poe2_realistic_data_system.py  # 💡 基于真实数据的推荐系统 (NEW)
 │
-├── src/poe2build/                   # 源代码包
-│   ├── __init__.py
-│   ├── core/                        # 核心功能模块
-│   │   ├── ai_orchestrator.py      # AI协调器
-│   │   ├── build_generator.py      # 构筑生成器
-│   │   └── recommender.py          # 推荐引擎
-│   ├── models/                      # 数据模型
-│   │   ├── build.py                # 构筑模型
-│   │   ├── characters.py           # 角色模型
-│   │   ├── items.py                # 物品模型
-│   │   ├── market.py               # 市场模型
-│   │   └── skills.py               # 技能模型
-│   ├── data_sources/               # 数据源集成
-│   ├── pob2/                       # PoB2集成
-│   ├── rag/                        # RAG系统
-│   ├── resilience/                 # 弹性架构
-│   ├── utils/                      # 工具函数
-│   └── config/                     # 配置管理
+├── gui_apps/                           # 🖥️ GUI应用程序
+│   ├── poe2_complete_gui.py            # 🚀 完整功能GUI (强烈推荐)
+│   ├── poe2_integrated_gui.py          # 主集成GUI应用
+│   ├── poe2_professional_gui.py        # 专业版GUI
+│   ├── poe2_ultimate_gui.py            # 旗舰版GUI
+│   ├── gui_with_console.py             # 简化版GUI+控制台
+│   ├── demo_gui_backend_integration.py # GUI后端集成演示
+│   ├── demo_new_welcome_page.py        # 新欢迎页面演示
+│   ├── run_gui.py                      # GUI启动器
+│   └── setup_gui.py                    # GUI安装设置
 │
-├── tests/                           # 测试套件
-│   ├── unit/                       # 单元测试 (70%)
-│   ├── integration/                # 集成测试 (20%)
-│   ├── performance/                # 性能测试 (10%)
-│   ├── e2e/                        # 端到端测试
-│   └── fixtures/                   # 测试数据
+├── core_ai_engine/                     # 🧠 核心AI引擎
+│   ├── poe2_ai_orchestrator.py         # AI协调器 (CLI入口)
+│   └── src/poe2build/                  # 核心源代码模块
+│       ├── __init__.py
+│       ├── data_sources/               # 🎯 四大核心数据源 (完全集成)
+│       │   ├── __init__.py            # 统一导入接口 + 动态爬虫集成
+│       │   ├── poe2scout/             # PoE2Scout市场API
+│       │   │   ├── __init__.py
+│       │   │   └── api_client.py     # ✅ 完成
+│       │   ├── ninja/                 # PoE Ninja爬虫
+│       │   │   ├── __init__.py
+│       │   │   └── scraper.py        # ✅ 完成
+│       │   ├── pob2/                  # Path of Building 2
+│       │   │   ├── __init__.py
+│       │   │   └── data_extractor.py # ✅ 完成 (三层缓存策略)
+│       │   └── poe2db/                # PoE2DB数据库
+│       │       ├── __init__.py
+│       │       └── api_client.py     # ✅ 完成
+│       │
+│       ├── rag/                       # 🧠 RAG AI系统
+│       │   ├── __init__.py
+│       │   ├── four_sources_integration.py # 四源集成训练器
+│       │   ├── data_collector.py      # 数据收集器
+│       │   ├── vectorizer.py          # 向量化引擎
+│       │   ├── index_builder.py       # 索引构建器
+│       │   ├── similarity_engine.py   # 相似性引擎
+│       │   ├── ai_engine.py           # AI推荐引擎
+│       │   ├── knowledge_base.py      # 知识库管理
+│       │   └── recommendation.py      # 推荐算法
+│       │
+│       └── gui/                       # GUI组件模块
+│           ├── __init__.py
+│           └── [GUI组件文件]
 │
-├── prompts/                         # 构建指导文件
-│   ├── 01_foundation_setup.txt     # 基础设置
-│   ├── 02_data_models.txt          # 数据模型
-│   ├── ...                         # 其他阶段指导
-│   └── 23_packaging_distribution.txt # 打包分发
+├── dependencies/                       # 📦 依赖管理
+│   ├── requirements.txt                # 基础项目依赖
+│   ├── requirements-gui.txt            # GUI专用依赖
+│   ├── requirements-windows.txt        # Windows集成依赖
+│   └── pyproject.toml                  # 项目配置
 │
-├── docs/                           # 项目文档
-├── scripts/                        # 工具脚本
-└── data/                           # 数据文件
+├── tests_and_validation/               # 🧪 测试和验证
+│   ├── tests/                          # 标准测试套件
+│   ├── test/                           # 额外测试目录
+│   ├── examples/                       # 示例代码
+│   │   ├── demo_models.py
+│   │   └── test_models.py
+│   ├── test_*.py                       # 独立测试文件
+│   ├── run_tests.py                    # 测试运行器
+│   ├── run_quick_tests.py              # 快速测试
+│   └── pytest.ini                     # pytest配置
+│
+├── docs_and_guides/                    # 📚 文档和指导
+│   ├── docs/                           # 📂 详细文档库
+│   │   ├── 01_real_architecture.md     # 架构文档
+│   │   ├── 02_poe2_data_sources.md     # 数据源文档
+│   │   ├── 03_poe2_calculator.md       # 计算器文档
+│   │   ├── 04_api_usage.md             # API使用指导
+│   │   ├── 05_developer_guide.md       # 开发者指南
+│   │   ├── 06_deployment.md            # 部署指南
+│   │   ├── 07_troubleshooting.md       # 故障排除
+│   │   ├── 08_project_structure.md     # 项目结构
+│   │   ├── 09_development_workflow.md  # 开发流程
+│   │   ├── 10_testing_strategy.md      # 测试策略
+│   │   ├── 11_pob2_integration.md      # PoB2集成
+│   │   ├── 12_rag_ai_training.md       # RAG AI训练
+│   │   └── README.md                   # 文档索引
+│   │
+│   ├── prompts/                        # 📝 构建指导文件
+│   │   ├── current_status.md           # 当前项目状态
+│   │   ├── build_gui_integration.txt   # GUI集成构建指导
+│   │   ├── rag_training_guide.txt      # RAG训练指导
+│   │   └── data_sources_setup.txt      # 数据源设置指导
+│   │
+│   └── 项目状态文档/
+│       ├── GUI_*.md                    # GUI相关文档
+│       ├── WINDOWS_INTEGRATION.md      # Windows集成
+│       ├── PROJECT_FINAL_STATUS.md     # 项目最终状态
+│       ├── PHASE5_COMPLETION_REPORT.md # 阶段5完成报告
+│       ├── TESTING_GUIDE.md            # 测试指南
+│       └── USAGE.md                    # 使用指南
+│
+├── scripts_and_tools/                  # 🔧 脚本和工具
+│   ├── scripts/                        # 构建和部署脚本
+│   │   ├── build_gui.ps1              # GUI构建脚本
+│   │   ├── create_installer.ps1        # 安装程序创建
+│   │   └── test_windows_integration.ps1 # Windows集成测试
+│   │
+│   └── 资源文件/
+│       ├── resources/                  # 静态资源
+│       └── .github/                    # GitHub配置
+│
+├── data_storage/                       # 💾 数据存储 (完全集成)
+│   ├── data/                           # 核心数据目录
+│   │   ├── rag_cache/                  # RAG缓存数据
+│   │   ├── pob2_cache/                 # PoB2缓存数据 (GitHub下载文件)
+│   │   ├── market_cache/               # PoE2Scout市场数据缓存 (NEW)
+│   │   ├── ninja_cache/                # Ninja Meta构筑缓存 (NEW)
+│   │   └── poe2db_cache/               # PoE2DB技能数据缓存 (NEW)
+│   │   └── four_sources_output/        # 四源集成输出
+│   │
+│   ├── logs/                           # 应用日志
+│   ├── temp/                           # 临时文件
+│   ├── test_reports/                   # 测试报告
+│   └── test_knowledge/                 # 测试知识库
+│
+├── config_files/                       # ⚙️ 配置文件
+│   ├── .env.example                    # 环境变量示例
+│   ├── .gitignore                      # Git忽略规则
+│   ├── .pre-commit-config.yaml         # 预提交钩子
+│   └── .vscode/                        # VS Code配置
+│
+├── reference_docs/                     # 📄 参考文档
+│   ├── 《流放之路2》生态系统程序化访问开发者指南.docx
+│   └── How to query POE2 API.docx
+│
+├── README.md                           # 📖 主项目文档
+├── CLAUDE.md                           # 🤖 Claude开发指导
+└── run_complete_gui.py                 # 🚀 完整GUI启动脚本
 ```
 
-## 使用示例
+## 🛠️ 核心功能模块
 
-### CLI基础用法
-```bash
-# 生成弓手构筑推荐
-python poe2_ai_orchestrator.py --class Ranger --style bow --budget 15divine
+### 1. 四大数据源集成管理 (完全真实数据)
+- **动态数据爬虫**: 实时获取PoE2Scout、PoE Ninja、PoE2DB最新数据  
+- **GitHub数据同步**: 自动下载PoB2最新游戏数据文件
+- **三层缓存策略**: 缓存 → GitHub → 本地，确保数据可用性
+- **实时健康监控**: 自动检测四大数据源状态和数据获取结果
+- **智能回退机制**: 单一数据源故障不影响系统运行
 
-# 交互式模式
-python poe2_ai_orchestrator.py --interactive
+### 2. RAG AI训练系统
+- **四源知识库**: 基于四大数据源构建统一知识库
+- **向量化引擎**: 构筑数据语义向量化和相似性检索
+- **AI推荐算法**: 智能分析用户需求生成构筑推荐
+- **持续学习**: 支持增量训练和知识库更新
 
-# 批量处理
-python poe2_ai_orchestrator.py --batch builds_input.json --output results/
-```
+### 3. PoB2高度集成
+- **双模式支持**: GitHub在线数据 + 本地安装数据
+- **精确计算**: 利用PoB2引擎进行DPS/EHP精确计算
+- **构筑导入导出**: 生成标准PoB2导入码
+- **实时验证**: 自动验证生成构筑的有效性
 
-### Python API使用
+### 4. 专业GUI界面
+- **PoE2风格主题**: 仿游戏界面设计风格
+- **F12开发者控制台**: 类似浏览器的调试功能
+- **实时状态监控**: 四大数据源健康状态实时显示
+- **拖拽式操作**: 直观的构筑配置和修改
+
+## 💻 使用示例
+
+### 动态数据爬虫系统使用
 ```python
-from src.poe2build.core.ai_orchestrator import PoE2AIOrchestrator
+from dynamic_data_crawlers import DynamicDataManager
+from pob2_github_downloader import PoB2GitHubDownloader
 
-# 初始化AI协调器
-orchestrator = PoE2AIOrchestrator()
+# 动态获取四大数据源真实数据
+manager = DynamicDataManager()
+data = manager.update_all_data()
 
-# 构筑推荐请求
-build_request = {
-    'preferences': {
-        'class': 'Ranger',
-        'style': 'bow', 
-        'goal': 'endgame_content',
-        'budget': {'amount': 15, 'currency': 'divine'}
-    }
-}
+print(f"✅ 实时数据获取完成:")
+print(f"  市场物品: {len(data['market_items'])} 个")
+print(f"  Meta构筑: {len(data['meta_builds'])} 个") 
+print(f"  技能数据: {len(data['skill_data'])} 个")
 
-# 生成推荐
-recommendations = orchestrator.generate_build_recommendation(build_request)
-
-# 显示结果
-for build in recommendations['recommendations']:
-    print(f"构筑: {build['build_name']}")
-    print(f"预估DPS: {build['estimated_dps']:,}")
-    print(f"预算: {build['cost_analysis']['total_cost']}")
+# 下载最新PoB2数据
+downloader = PoB2GitHubDownloader()
+data_results = downloader.download_data_directory()
+tree_results = downloader.download_tree_data()
+print(f"  PoB2文件: {len([r for r in data_results.values() if r])} 个数据文件")
 ```
 
-## 技术栈
+### 四大数据源健康检查 (完全集成版本)
+```python
+from src.poe2build.data_sources import health_check_all_sources, get_all_four_sources
 
-**核心依赖**:
-- `requests>=2.31.0` - HTTP客户端
-- `beautifulsoup4>=4.12.0` - HTML解析
-- `pydantic>=2.0.0` - 数据验证
-- `psutil>=5.9.0` - 系统进程监控
+# 检查所有数据源状态 (使用动态爬虫系统)
+health = health_check_all_sources()
+healthy_sources = [name for name, info in health.items() 
+                  if info.get('available', False) or 
+                     info.get('status', {}).get('status') == 'healthy']
+print(f"健康的数据源: {len(healthy_sources)}/4 - {healthy_sources}")
 
-**RAG系统**:
-- `sentence-transformers>=2.2.0` - 语义向量化
-- `faiss-cpu>=1.7.0` - 向量检索
+# 获取四大数据源实时数据
+all_data = get_all_four_sources(limit=100)
+print(f"PoE2Scout数据: {len(all_data['poe2scout_data'])} 条")
+print(f"PoB2技能宝石: {len(all_data['pob2_data'].get('skill_gems', []))} 个")
+```
 
-**开发工具**:
-- `pytest` - 测试框架
-- `black` - 代码格式化
-- `mypy` - 类型检查
+### RAG AI训练和推荐
+```python
+from src.poe2build.rag.four_sources_integration import FourSourcesRAGTrainer
+import asyncio
 
-**可选组件**:
-- `PyQt6` - Windows GUI
-- `FastAPI` - Web服务器
-- `aiohttp>=3.8.0` - 异步HTTP
+async def train_and_recommend():
+    # 创建四大数据源RAG训练器
+    trainer = FourSourcesRAGTrainer(enable_github_pob2=True)
+    
+    # 收集四大数据源数据
+    data = await trainer.collect_all_four_sources("Standard")
+    
+    # 训练RAG AI
+    training_result = await trainer.train_rag_ai(data)
+    
+    print(f"训练完成: {training_result['knowledge_entries']} 个知识条目")
+    return training_result
 
-## 开发指导
+# 运行训练
+asyncio.run(train_and_recommend())
+```
 
-### 运行测试
+### PoB2集成计算示例
+```python
+from src.poe2build.data_sources.pob2.data_extractor import get_pob2_extractor
+
+# 获取PoB2数据提取器
+extractor = get_pob2_extractor()
+
+if extractor.is_available():
+    # 获取所有技能宝石
+    skills = extractor.get_skill_gems()
+    print(f"可用技能数量: {len(skills)}")
+    
+    # 查找特定技能
+    lightning_arrow = extractor.get_gem_by_name("Lightning Arrow")
+    if lightning_arrow:
+        print(f"技能: {lightning_arrow.name}")
+        print(f"类型: {lightning_arrow.gem_type}")
+        print(f"标签: {', '.join(lightning_arrow.tags)}")
+```
+
+## 🔧 开发和调试
+
+### 运行GUI应用
 ```bash
-# 运行全部测试
-python -m pytest tests/ -v
+# 🎯 启动完整功能GUI (推荐方式)
+python run_complete_gui.py
 
-# 运行特定测试类型
-python -m pytest tests/unit/ -v          # 单元测试
-python -m pytest tests/integration/ -v   # 集成测试
-python -m pytest tests/performance/ -v   # 性能测试
+# 🔧 功能特点:
+# • 四大数据源实时监控
+# • RAG AI智能训练
+# • PoB2高度集成推荐
+# • F12开发者控制台 (按F12打开)
+# • 实时DPS/EHP精确计算
+# • 构筑导入导出功能
 
-# 生成测试覆盖率报告
-python -m pytest --cov=src/poe2build tests/
+# 💡 快捷键:
+# • F12 - 开发者控制台
+# • Ctrl+R - 刷新数据源状态  
+# • Ctrl+T - 开始RAG训练
+# • Ctrl+G - 生成智能推荐
 ```
 
-### 代码质量检查
+### 测试数据源连接
 ```bash
-# 代码格式化
-black src/ tests/
+# 测试所有四大数据源
+python -c "
+from src.poe2build.data_sources import health_check_all_sources
+import json
+health = health_check_all_sources()
+print(json.dumps(health, indent=2, default=str))
+"
 
-# 类型检查
-mypy src/poe2build
-
-# 运行预提交钩子
-pre-commit run --all-files
+# 测试特定数据源
+python -c "
+from src.poe2build.data_sources.ninja.scraper import get_ninja_scraper
+scraper = get_ninja_scraper()
+builds = scraper.get_popular_builds('Standard', limit=5)
+print(f'获取到 {len(builds)} 个流行构筑')
+"
 ```
 
-### 健康检查
+### 性能监控
 ```bash
-# 验证数据源连接
-python -c "from src.poe2build.core.ai_orchestrator import PoE2AIOrchestrator; PoE2AIOrchestrator().health_check()"
-
-# 验证PoB2集成
-python -c "from src.poe2build.pob2 import PoB2LocalClient; PoB2LocalClient().detect_installation()"
+# 监控RAG训练性能
+python -c "
+import time
+from src.poe2build.rag.four_sources_integration import FourSourcesRAGTrainer
+trainer = FourSourcesRAGTrainer()
+start = time.time()
+# 这里执行训练代码
+print(f'训练耗时: {time.time() - start:.2f}秒')
+"
 ```
 
-## 故障排除
+## 📋 构建检查清单
 
-### 常见问题
+在部署或分发之前，请确认以下项目：
 
-**1. 数据源连接失败**
+- [ ] **四大数据源连接测试通过**
+- [ ] **RAG AI训练可以正常完成**
+- [ ] **PoB2集成功能正常工作**
+- [ ] **GUI界面可以正常启动**
+- [ ] **F12开发者控制台功能正常**
+- [ ] **构筑导入导出功能测试通过**
+- [ ] **错误处理机制测试完成**
+- [ ] **缓存机制正常工作**
+
+## 🐛 故障排除
+
+### 数据源连接问题
 ```bash
 # 检查网络连接
 ping poe2scout.com
-ping poe2db.tw
 ping poe.ninja
+ping poe2db.tw
 
-# 检查防火墙设置
-# 确保允许Python访问网络
+# 检查Python网络权限
+python -c "import requests; print(requests.get('https://poe2scout.com', timeout=5).status_code)"
 ```
 
-**2. PoB2集成问题**
+### PoB2集成问题
 ```bash
-# 验证PoB2安装
-# 检查Path of Building Community是否正确安装
-# 确认版本兼容性 (推荐v2.35+)
+# 检查PoB2路径检测
+python -c "
+from src.poe2build.data_sources.pob2.data_extractor import get_pob2_extractor
+extractor = get_pob2_extractor()
+print('PoB2可用:', extractor.is_available())
+print('安装信息:', extractor.get_installation_info())
+"
 ```
 
-**3. 内存不足**
+### RAG训练内存问题
 ```bash
-# 减少RAG向量维度
-# 调整缓存大小设置
-# 分批处理大量数据
+# 监控内存使用
+python -c "
+import psutil
+print(f'可用内存: {psutil.virtual_memory().available // 1024**3} GB')
+print(f'内存使用率: {psutil.virtual_memory().percent}%')
+"
 ```
 
-## 贡献指南
-
-1. Fork项目仓库
-2. 创建功能分支 (`git checkout -b feature/amazing-feature`)
-3. 提交更改 (`git commit -m 'Add amazing feature'`)
-4. 推送分支 (`git push origin feature/amazing-feature`)
-5. 创建Pull Request
-
-### 开发规范
-- 遵循PEP 8代码风格
-- 编写单元测试覆盖新功能
-- 更新相关文档
-- 确保所有测试通过
-
-## 许可证
+## 📄 许可证
 
 本项目采用MIT许可证 - 详见 [LICENSE](LICENSE) 文件
 
-## 免责声明
+## 🚨 免责声明
 
 本工具仅供《流放之路2》玩家学习和研究使用。请遵守游戏服务条款，理论构筑仅供参考。工具开发者不对使用本工具产生的任何后果承担责任。
 
 ---
 
-**项目状态**: 🚧 积极开发中
-**最后更新**: 2024-08-31
-**版本**: 2.0.0
+**项目状态**: ✅ 四大数据源集成完成 | 🧠 RAG AI系统完成 | 🖥️ GUI界面完成  
+**最后更新**: 2025-09-02  
+**版本**: 2.1.0 - 四大数据源集成版

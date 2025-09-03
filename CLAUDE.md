@@ -4,40 +4,61 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a **Path of Exile 2 (PoE2) Build Generator** that uses real, verified PoE2-specific data sources to generate intelligent build recommendations. The project has been completely refactored from theoretical APIs to actual working data sources.
+This is a **Path of Exile 2 (PoE2) Build Generator** that integrates **FOUR CORE REAL DATA SOURCES** to generate intelligent, accurate build recommendations based on actual game data and community trends.
+
+## 🎯 **FOUR CORE DATA SOURCES (Foundation)**
+
+**CRITICAL**: This project is built upon these four essential data sources that must be integrated and maintained:
+
+### 1. **PoE2Scout API** (https://poe2scout.com)
+- **Purpose**: Real-time market pricing data
+- **Data**: Item prices, currency exchange rates, market trends
+- **Usage**: Build cost estimation, budget optimization
+- **Integration**: REST API with rate limiting and cache
+
+### 2. **PoE Ninja Builds** (https://poe.ninja/poe2/builds) 
+- **Purpose**: Meta build analysis and community trends
+- **Data**: Popular builds, skill usage statistics, ascendancy trends
+- **Usage**: Meta recommendations, build popularity scoring
+- **Integration**: Web scraping with respectful rate limiting
+
+### 3. **Path of Building 2** (https://github.com/PathOfBuildingCommunity/PathOfBuilding-PoE2)
+- **Purpose**: Official build calculation engine and data
+- **Data**: Skills, passive tree, items, calculations
+- **Local Path**: `F:\steam\steamapps\common\Path of Exile 2\Path of Building Community (PoE2)`
+- **Usage**: Accurate DPS/EHP calculations, build validation
+- **Integration**: Local data files parsing + calculation engine
+
+### 4. **PoE2DB** (https://poe2db.tw/cn/)
+- **Purpose**: Complete game database
+- **Data**: Skills, items, passive nodes, base types, mods
+- **Usage**: Comprehensive game data reference
+- **Integration**: API integration + web scraping backup
 
 ### Core Architecture
 
-The system follows a **PoB2集成架构（PoB2-Integrated Architecture）** leveraging Path of Building Community for accurate calculations:
+The system follows a **四源集成架构（Quad-Source Integration Architecture）**:
 
-#### 1. PoB2-Driven Architecture
+#### 1. Real Data Integration Architecture
 ```
-ICalculationEngine (interface)
-├── PoB2LocalEngine (primary - local PoB2 installation)
-├── PoB2WebEngine (fallback - web-based PoB2)
-└── MockCalculationEngine (testing/offline)
+DataSourceManager (core coordinator)
+├── PoE2ScoutConnector (market prices)
+├── NinjaMetaScraper (build trends) 
+├── PoB2DataExtractor (calculations & validation)
+└── PoE2DBConnector (game data)
 
-IDataProvider (interface)
-├── PoE2ScoutAPI (market data)
-├── PoE2NinjaScraper (meta analysis)
-├── PoB2DataExtractor (build calculations)
-└── PoB2BuildImporter (build import/export)
+RAGTrainingPipeline (AI knowledge base)
+├── MarketDataProcessor (price trends)
+├── MetaBuildAnalyzer (popular builds)
+├── SkillTreeProcessor (passive allocations)
+└── ItemDatabaseBuilder (equipment data)
 ```
 
-#### 2. Core Components
-1. **PoE2AIOrchestrator** - AI-driven build recommendation coordinator
-2. **PoB2 Integration Layer**:
-   - `PoB2LocalClient` - Local Path of Building Community interface
-   - `PoB2BuildGenerator` - AI-generated build creation for PoB2
-   - `PoB2Calculator` - Leverage PoB2's calculation engine
-3. **AI Recommendation Engine** - Generate optimized build configurations
-4. **Data Collection Layer**:
-   - `PoE2ScoutAPI` (https://poe2scout.com) - Market pricing data
-   - `PoE2NinjaScraper` (https://poe.ninja/poe2/builds) - Meta trends
-5. **Resilience Layer**:
-   - **PoB2 Installation Detection** - Auto-locate local PoB2 installation
-   - **Fallback Mechanisms** - Web PoB2 or cached calculations when local unavailable
-   - **Build Validation** - Verify AI-generated builds are valid in PoB2
+#### 2. Data Integration Layer
+1. **Real-time Data Collectors** - Fetch live data from all four sources
+2. **Data Validation & Normalization** - Ensure consistency across sources
+3. **RAG Knowledge Base Builder** - Train AI on real game data
+4. **Cache & Persistence Layer** - Efficient data storage and retrieval
 
 #### 3. "生态公民" Philosophy
 - Respectful API usage with intelligent rate limiting

@@ -1,0 +1,70 @@
+# PoE2智能构筑生成器 - Windows集成专用依赖
+# 这些依赖用于支持完整的Windows系统集成功能
+
+# 基础依赖（从requirements.txt继承）
+-r requirements.txt
+
+# Windows GUI框架
+PyQt6>=6.4.0
+PyQt6-Qt6>=6.4.0
+
+# Windows系统API访问
+pywin32>=306
+pywin32-ctypes>=0.2.0
+
+# Windows原生通知支持  
+win10toast>=0.9
+plyer>=2.1.0
+
+# 系统托盘和桌面集成
+pystray>=0.19.4
+Pillow>=9.0.0
+
+# Windows注册表和系统服务
+winreg; sys_platform == "win32"
+
+# 进程管理和系统监控
+psutil>=5.9.0
+
+# Windows-specific utilities
+wmi>=1.5.1; sys_platform == "win32"
+pygetwindow>=0.0.9; sys_platform == "win32"
+
+# Windows COM支持（可选）
+comtypes>=1.1.14; sys_platform == "win32"
+
+# Windows任务调度（自动启动等）
+schedule>=1.2.0
+
+# 文件系统监控
+watchdog>=3.0.0
+
+# Windows Shell集成
+pyshell>=0.1.0; sys_platform == "win32"
+
+# Windows防火墙和安全
+python-wmi>=1.5.1; sys_platform == "win32"
+
+# 开发和测试依赖
+pytest>=7.0.0
+pytest-qt>=4.2.0
+pytest-mock>=3.10.0
+
+# Windows特定测试工具
+pytest-windows>=0.1.0; sys_platform == "win32"
+
+# 构建和打包工具
+PyInstaller>=5.10.0
+nuitka>=1.8.0; sys_platform == "win32"
+
+# 数字签名工具（Python包装）
+signtool>=0.1.0; sys_platform == "win32"
+
+# Windows性能分析
+py-spy>=0.3.14; sys_platform == "win32"
+
+# Windows事件日志
+pywin32-eventlog>=1.0.0; sys_platform == "win32"
+
+# Windows服务支持
+python-windows-service>=1.0.0; sys_platform == "win32"

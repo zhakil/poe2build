@@ -1,0 +1,40 @@
+[
+  {
+    "insight_type": "class_dominance",
+    "title": "Ranger 职业主导当前Meta",
+    "description": "Ranger 占据了 33.3% 的构筑，显示出强势的Meta地位。",
+    "confidence": 0.9,
+    "supporting_data": {
+      "class_distribution": {
+        "Ranger": 5,
+        "Witch": 5,
+        "Marauder": 5
+      }
+    },
+    "created_at": "2025-09-01T11:48:21.252344",
+    "tags": [
+      "meta",
+      "class_analysis",
+      "ranger"
+    ]
+  },
+  {
+    "insight_type": "skill_popularity",
+    "title": "当前Meta热门技能分析",
+    "description": "最受欢迎的技能是 Lightning Arrow (5 个构筑)，其次是 Fireball 和 Earthquake。",
+    "confidence": 0.8,
+    "supporting_data": {
+      "skill_distribution": {
+        "Lightning Arrow": 5,
+        "Fireball": 5,
+        "Earthquake": 5
+      }
+    },
+    "created_at": "2025-09-01T11:48:21.252344",
+    "tags": [
+      "meta",
+      "skill_analysis",
+      "trending"
+    ]
+  }
+]

@@ -1,0 +1,381 @@
+[
+  {
+    "name": "Chaos Spark Stormweaver",
+    "character_class": "Sorceress",
+    "ascendancy": "Stormweaver",
+    "main_skill": "Spark",
+    "support_gems": [
+      "Added Chaos Damage",
+      "Spell Echo",
+      "Controlled Destruction",
+      "Elemental Focus",
+      "Lightning Penetration"
+    ],
+    "popularity": 0.03,
+    "average_level": 85,
+    "key_items": [
+      "weapon",
+      "armor",
+      "jewelry"
+    ],
+    "estimated_dps": 850000,
+    "passive_tree": {
+      "keystones": [
+        "Eldritch Battery",
+        "Mind over Matter"
+      ],
+      "major_nodes": [
+        "Spell Damage clusters (120% increased)",
+        "Chaos Damage clusters (80% increased)",
+        "Cast Speed clusters (45% increased)",
+        "Energy Shield clusters (180% increased)",
+        "Mana clusters (150% increased)"
+      ],
+      "total_points": 110,
+      "life_nodes": "160% increased Life",
+      "es_nodes": "240% increased Energy Shield"
+    },
+    "equipment": {
+      "weapon": {
+        "type": "Staff",
+        "requirements": "High Spell Damage, +3 Lightning Gems",
+        "ideal_mods": [
+          "+3 Level to Lightning Gems",
+          "80%+ Spell Damage",
+          "Cast Speed",
+          "Chaos Damage"
+        ],
+        "budget_cost": "2-5 Divine Orbs"
+      },
+      "armor": {
+        "chest": "Rare ES chest with 6L (700+ ES, Life, Resistances)",
+        "helmet": "Rare ES helmet (300+ ES, Life, Resistances)",
+        "boots": "Rare ES boots (250+ ES, 30%+ Movement Speed, Life)",
+        "gloves": "Rare ES gloves (200+ ES, Life, Resistances)",
+        "belt": "Rare ES belt (Life, ES, Resistances, Flask charges)"
+      },
+      "jewelry": {
+        "rings": "2x Rare rings (Life, ES, Resistances, Spell Damage, Mana)",
+        "amulet": "Rare amulet (+2 Lightning Gems, Life, ES, Spell Damage)"
+      }
+    },
+    "flask_setup": [
+      {
+        "type": "Divine Life Flask",
+        "mods": [
+          "Immunity to Bleeding",
+          "Life Recovery Rate"
+        ]
+      },
+      {
+        "type": "Divine Mana Flask",
+        "mods": [
+          "Immunity to Freeze",
+          "Mana Recovery Rate"
+        ]
+      },
+      {
+        "type": "Diamond Flask",
+        "mods": [
+          "Critical Strike Chance",
+          "Duration"
+        ]
+      },
+      {
+        "type": "Granite Flask",
+        "mods": [
+          "Armor Rating",
+          "Duration"
+        ]
+      },
+      {
+        "type": "Quicksilver Flask",
+        "mods": [
+          "Movement Speed",
+          "Duration"
+        ]
+      }
+    ],
+    "aura_setup": [
+      "Clarity",
+      "Herald of Thunder",
+      "Discipline"
+    ],
+    "defense_stats": {
+      "life": 4500,
+      "energy_shield": 3200,
+      "effective_health_pool": 7700,
+      "armor": 6000,
+      "evasion": 0,
+      "resistances": {
+        "fire": 75,
+        "cold": 75,
+        "lightning": 75,
+        "chaos": 15
+      },
+      "block_chance": 0
+    },
+    "offense_stats": {
+      "total_dps": 850000,
+      "spark_dps": 850000,
+      "crit_chance": 45,
+      "crit_multiplier": 320,
+      "cast_speed": 3.2,
+      "projectiles": 9
+    },
+    "movement_stats": {
+      "movement_speed": 125,
+      "whirling_blades": true,
+      "flame_dash": true
+    },
+    "cost_analysis": {
+      "league_start_cost": 0.5,
+      "mid_league_cost": 8.0,
+      "min_maxing_cost": 50.0,
+      "daily_maintenance": 0.1
+    },
+    "playstyle": "\u8fdc\u7a0b\u6cd5\u672fDPS\uff0c\u901a\u8fc7Spark\u6295\u5c04\u7269\u6e05\u5c4f",
+    "difficulty_rating": 2,
+    "league_suitability": [
+      "Standard",
+      "League",
+      "SSF"
+    ],
+    "pros_cons": {
+      "pros": [
+        "\u6781\u9ad8\u7684\u533a\u57df\u4f24\u5bb3\u548c\u6e05\u5c4f\u6548\u7387",
+        "\u88c5\u5907\u9700\u6c42\u4f4e\uff0c\u5347\u7ea7\u8fc7\u6e21\u5bb9\u6613",
+        "\u64cd\u4f5c\u7b80\u5355\uff0c\u9002\u5408\u65b0\u624b",
+        "Chaos\u4f24\u5bb3\u7ed5\u8fc7\u5927\u90e8\u5206\u602a\u7269\u6297\u6027",
+        "\u6295\u5c04\u7269\u81ea\u52a8\u5bfb\u654c\uff0c\u8986\u76d6\u8303\u56f4\u5927"
+      ],
+      "cons": [
+        "\u5355\u4f53\u4f24\u5bb3\u76f8\u5bf9\u8f83\u4f4e",
+        "\u9700\u8981\u5408\u7406\u7684\u8d70\u4f4d\u907f\u514d\u4f24\u5bb3",
+        "\u540e\u671f\u6269\u5c55\u9700\u8981\u6602\u8d35\u88c5\u5907",
+        "\u5bf9\u53cd\u5c04\u602a\u7269\u654f\u611f"
+      ]
+    },
+    "leveling_guide": [
+      {
+        "levels": "1-12",
+        "skills": "Spark + Added Lightning",
+        "notes": "\u57fa\u7840\u6cd5\u672f\u5347\u7ea7"
+      },
+      {
+        "levels": "12-31",
+        "skills": "Spark + Added Chaos + Spell Echo",
+        "notes": "\u6dfb\u52a0\u6df7\u6c8c\u4f24\u5bb3\u8f6c\u5316"
+      },
+      {
+        "levels": "31-45",
+        "skills": "4L Spark\u914d\u7f6e",
+        "notes": "\u83b7\u5f97\u7b2c4\u4e2a\u8f85\u52a9\u5b9d\u77f3"
+      },
+      {
+        "levels": "45-68",
+        "skills": "5L\u914d\u7f6e + \u5149\u73af",
+        "notes": "\u5b8c\u5584\u8f85\u52a9\u6280\u80fd"
+      },
+      {
+        "levels": "68+",
+        "skills": "6L\u914d\u7f6e + \u5b8c\u6574\u88c5\u5907",
+        "notes": "\u7ec8\u5c40\u914d\u7f6e"
+      }
+    ],
+    "endgame_scaling": {
+      "damage": "\u901a\u8fc7\u9ad8\u7ea7\u88c5\u5907\u3001\u89c9\u9192\u5b9d\u77f3\u63d0\u5347",
+      "defense": "\u5347\u7ea7ES\u88c5\u5907\u3001\u6dfb\u52a0\u7269\u7406\u51cf\u4f24",
+      "qol": "\u83b7\u5f97\u66f4\u591a\u6295\u5c04\u7269\u3001\u63d0\u5347\u79fb\u52a8\u901f\u5ea6"
+    }
+  },
+  {
+    "name": "Poison Blade Vortex Deadeye",
+    "character_class": "Ranger",
+    "ascendancy": "Deadeye",
+    "main_skill": "Blade Vortex",
+    "support_gems": [
+      "Deadly Poison",
+      "Spell Echo",
+      "Controlled Destruction",
+      "Void Manipulation",
+      "Swift Affliction"
+    ],
+    "popularity": 0.05,
+    "average_level": 85,
+    "key_items": [
+      "weapon",
+      "armor",
+      "jewelry"
+    ],
+    "estimated_dps": 1200000,
+    "passive_tree": {
+      "keystones": [
+        "Ghost Reaver",
+        "Zealotry"
+      ],
+      "major_nodes": [
+        "Spell Damage clusters (100% increased)",
+        "Poison Damage clusters (120% increased)",
+        "Cast Speed clusters (50% increased)",
+        "Life clusters (180% increased)",
+        "Dodge clusters (40% increased)"
+      ],
+      "total_points": 108,
+      "life_nodes": "185% increased Life",
+      "es_nodes": "80% increased Energy Shield"
+    },
+    "equipment": {
+      "weapon": {
+        "main_hand": "Rare Claw (High DPS, Poison Chance, Life Gain on Hit)",
+        "off_hand": "Rare Shield (Life, ES, Resistances, Spell Damage)",
+        "ideal_mods": [
+          "Poison Chance",
+          "Chaos Damage",
+          "Cast Speed",
+          "Life Gain on Hit"
+        ],
+        "budget_cost": "3-8 Divine Orbs"
+      },
+      "armor": {
+        "chest": "Rare Life/ES hybrid chest with 6L (100+ Life, 400+ ES)",
+        "helmet": "Rare Life helmet (80+ Life, Resistances, Accuracy)",
+        "boots": "Rare Life boots (80+ Life, 30%+ Movement Speed)",
+        "gloves": "Rare Life gloves (80+ Life, Attack Speed, Resistances)",
+        "belt": "Rare Life belt (90+ Life, Resistances, Flask Effects)"
+      },
+      "jewelry": {
+        "rings": "2x Rare rings (Life, Resistances, Spell Damage, Mana Leech)",
+        "amulet": "Rare amulet (+2 Spell Gems, Life, Chaos Damage)"
+      }
+    },
+    "flask_setup": [
+      {
+        "type": "Divine Life Flask",
+        "mods": [
+          "Immunity to Poison",
+          "Life Recovery Rate"
+        ]
+      },
+      {
+        "type": "Divine Mana Flask",
+        "mods": [
+          "Immunity to Curses",
+          "Mana Recovery Rate"
+        ]
+      },
+      {
+        "type": "Atziri's Promise",
+        "mods": [
+          "Chaos Damage",
+          "Chaos Leech"
+        ]
+      },
+      {
+        "type": "Granite Flask",
+        "mods": [
+          "Armor Rating",
+          "Duration"
+        ]
+      },
+      {
+        "type": "Quicksilver Flask",
+        "mods": [
+          "Movement Speed",
+          "Duration"
+        ]
+      }
+    ],
+    "aura_setup": [
+      "Malevolence",
+      "Herald of Agony",
+      "Precision"
+    ],
+    "defense_stats": {
+      "life": 5200,
+      "energy_shield": 1800,
+      "effective_health_pool": 7000,
+      "armor": 4500,
+      "evasion": 8000,
+      "resistances": {
+        "fire": 75,
+        "cold": 75,
+        "lightning": 75,
+        "chaos": 45
+      },
+      "dodge_chance": 35
+    },
+    "offense_stats": {
+      "total_dps": 1200000,
+      "poison_dps": 800000,
+      "blade_vortex_hit_dps": 400000,
+      "poison_chance": 100,
+      "cast_speed": 4.1,
+      "blades_active": 10
+    },
+    "movement_stats": {
+      "movement_speed": 140,
+      "whirling_blades": true,
+      "blink_arrow": true
+    },
+    "cost_analysis": {
+      "league_start_cost": 1.0,
+      "mid_league_cost": 12.0,
+      "min_maxing_cost": 80.0,
+      "daily_maintenance": 0.2
+    },
+    "playstyle": "\u8fd1\u8ddd\u79bb\u65bd\u6cd5\uff0c\u901a\u8fc7\u6bd2\u7d20\u6301\u7eed\u4f24\u5bb3\u51fb\u8d25\u654c\u4eba",
+    "difficulty_rating": 3,
+    "league_suitability": [
+      "Standard",
+      "League"
+    ],
+    "pros_cons": {
+      "pros": [
+        "\u6781\u9ad8\u7684\u6301\u7eed\u4f24\u5bb3\u8f93\u51fa",
+        "\u6bd2\u7d20\u65e0\u89c6\u5927\u90e8\u5206\u9632\u5fa1",
+        "\u88c5\u5907\u5347\u7ea7\u8def\u5f84\u6e05\u6670",
+        "\u5bf9\u5355\u4f53BOSS\u6548\u679c\u6781\u4f73",
+        "\u6df7\u5408\u653b\u51fb\u548c\u6cd5\u672f\u7684\u72ec\u7279\u73a9\u6cd5"
+      ],
+      "cons": [
+        "\u9700\u8981\u8fd1\u8ddd\u79bb\u4f5c\u6218\uff0c\u6709\u4e00\u5b9a\u5371\u9669",
+        "\u6e05\u5c4f\u901f\u5ea6\u76f8\u5bf9\u8f83\u6162",
+        "\u4f9d\u8d56\u6bd2\u7d20\u53e0\u52a0\uff0c\u521d\u671f\u4f24\u5bb3\u504f\u4f4e",
+        "\u88c5\u5907\u9700\u6c42\u6bd4\u8f83\u7279\u6b8a"
+      ]
+    },
+    "leveling_guide": [
+      {
+        "levels": "1-12",
+        "skills": "Caustic Arrow",
+        "notes": "\u65e9\u671f\u6bd2\u7d20\u6280\u80fd"
+      },
+      {
+        "levels": "12-28",
+        "skills": "Blade Vortex + Deadly Poison",
+        "notes": "\u8f6c\u6362\u4e3b\u8981\u6280\u80fd"
+      },
+      {
+        "levels": "28-45",
+        "skills": "4L BV\u914d\u7f6e",
+        "notes": "\u6dfb\u52a0\u8f85\u52a9\u5b9d\u77f3"
+      },
+      {
+        "levels": "45-68",
+        "skills": "5L + \u5149\u73af\u914d\u7f6e",
+        "notes": "\u5b8c\u5584\u8f85\u52a9\u6280\u80fd"
+      },
+      {
+        "levels": "68+",
+        "skills": "6L + \u5b8c\u6574\u6bd2\u7d20\u914d\u7f6e",
+        "notes": "\u7ec8\u5c40\u914d\u7f6e"
+      }
+    ],
+    "endgame_scaling": {
+      "damage": "\u5806\u53e0\u66f4\u591a\u6bd2\u7d20\u4f24\u5bb3\u548c\u6301\u7eed\u65f6\u95f4",
+      "defense": "\u63d0\u5347\u751f\u547d\u503c\u548c\u95ea\u907f\u80fd\u529b",
+      "qol": "\u589e\u52a0\u79fb\u52a8\u901f\u5ea6\u548c\u65bd\u6cd5\u901f\u5ea6"
+    }
+  }
+]

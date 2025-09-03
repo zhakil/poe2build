@@ -1,0 +1,280 @@
+PoE2 四大数据源RAG AI训练指导
+
+=== 核心训练目标 ===
+基于四大真实PoE2数据源构建智能知识库，训练RAG AI推荐引擎，为玩家提供精准的构筑推荐。
+
+=== 四大数据源训练基础 ===
+
+1. PoE2Scout市场数据训练
+   - 物品价格分析和成本估算
+   - 货币汇率变化趋势学习
+   - 装备性价比评估算法
+   - 构筑成本预算智能计算
+
+2. PoE Ninja Meta趋势训练
+   - 流行构筑模式识别
+   - 技能使用频率分析
+   - 升华选择趋势学习
+   - Meta变化预测算法
+
+3. Path of Building 2数据训练
+   - 官方游戏数据精确解析
+   - DPS/EHP计算引擎学习
+   - 技能宝石搭配优化
+   - 天赋树路径规划算法
+
+4. PoE2DB完整数据库训练
+   - 装备属性关联分析
+   - 技能详情语义理解
+   - 游戏机制深度学习
+   - 中英文本地化处理
+
+=== 训练数据收集策略 ===
+
+阶段1: 基础数据采集
+- 使用 FourSourcesRAGTrainer.collect_all_four_sources()
+- 联盟选择: Standard, Hardcore, SSF
+- 数据量控制: 每源不超过10000条记录
+- 质量过滤: 置信度 > 0.7的数据
+
+阶段2: 数据预处理
+- 数据清洗和规范化
+- 重复数据去重
+- 异常值检测和处理
+- 数据关联性分析
+
+阶段3: 向量化处理
+- 使用 RAGVectorizer 进行语义向量化
+- 维度设置: 384维 (sentence-transformers标准)
+- 批量处理大小: 32条/批
+- 向量存储格式: NumPy数组
+
+阶段4: 知识库构建
+- 使用 RAGKnowledgeBase 构建索引
+- 相似性搜索算法: 余弦相似度
+- 索引类型: Faiss IVFFlat
+- 检索效率优化
+
+=== 训练质量控制 ===
+
+数据质量要求:
+- PoE2Scout: 价格数据准确性 > 95%
+- PoE Ninja: 构筑数据完整性 > 90%
+- PoB2: 计算结果一致性 > 99%
+- PoE2DB: 游戏数据时效性 < 24小时
+
+训练指标监控:
+- 数据收集完成率
+- 向量化处理速度
+- 相似性检索准确率
+- 推荐结果相关性
+
+错误处理机制:
+- 网络请求超时重试
+- 数据源不可用降级
+- 缓存数据兜底方案
+- 训练中断恢复机制
+
+=== RAG训练参数配置 ===
+
+基础配置:
+```python
+training_config = {
+    "leagues": ["Standard", "Hardcore"],
+    "max_builds_per_source": 5000,
+    "quality_threshold": 0.8,
+    "vector_dimensions": 384,
+    "similarity_threshold": 0.75,
+    "batch_size": 32,
+    "cache_ttl": 3600
+}
+```
+
+高级配置:
+- 学习率: 0.001 (Adam优化器)
+- 正则化: L2, lambda=0.01
+- 早停机制: 连续10轮无改善
+- 验证集比例: 20%
+
+模型保存:
+- 知识库文件: knowledge_base.faiss
+- 向量映射: vector_mapping.pkl
+- 训练日志: training_log.json
+- 模型检查点: model_checkpoint.pth
+
+=== 训练执行流程 ===
+
+1. 环境准备
+```python
+from src.poe2build.rag.four_sources_integration import FourSourcesRAGTrainer
+import asyncio
+
+trainer = FourSourcesRAGTrainer(enable_github_pob2=True)
+```
+
+2. 数据收集
+```python
+async def collect_training_data():
+    data = await trainer.collect_all_four_sources("Standard")
+    return data
+```
+
+3. RAG训练
+```python
+async def train_rag_model():
+    training_result = await trainer.train_rag_ai(collected_data)
+    return training_result
+```
+
+4. 效果验证
+```python
+def validate_training():
+    test_query = "Ranger bow build endgame"
+    recommendations = trainer.get_recommendations(test_query)
+    return recommendations
+```
+
+=== 增量训练策略 ===
+
+日常更新:
+- 每日凌晨3点自动训练
+- 仅更新变化的数据源
+- 增量向量化处理
+- 热更新知识库索引
+
+周期性完整训练:
+- 每周日完整重训练
+- 清理过期缓存数据
+- 重建完整知识库
+- 性能指标全面评估
+
+版本管理:
+- 训练版本号: YYYY.MM.DD.HH
+- 模型版本回滚能力
+- A/B测试支持
+- 性能对比分析
+
+=== 训练监控和调试 ===
+
+实时监控指标:
+- 数据收集进度
+- 向量化处理速度
+- 内存使用情况
+- 磁盘空间占用
+
+调试工具:
+- 训练日志详细记录
+- 中间结果可视化
+- 错误堆栈完整保存
+- 性能分析报告
+
+故障恢复:
+- 训练中断自动恢复
+- 数据损坏检测修复
+- 网络故障重试机制
+- 资源不足优雅降级
+
+=== 推荐质量评估 ===
+
+评估维度:
+1. 推荐相关性 (Relevance Score)
+2. 构筑可行性 (Viability Score)  
+3. 成本合理性 (Budget Score)
+4. Meta适应性 (Meta Score)
+
+评估方法:
+- 专家评估: PoE2资深玩家评分
+- 用户反馈: 推荐构筑使用满意度
+- 自动评估: 基于游戏数据验证
+- A/B测试: 不同训练版本对比
+
+质量改进:
+- 根据评估结果调整训练参数
+- 优化数据源权重分配
+- 改进向量化算法
+- 增强推荐算法逻辑
+
+=== 训练资源要求 ===
+
+硬件要求:
+- CPU: 8核心以上
+- 内存: 16GB以上
+- 存储: 50GB可用空间
+- 网络: 稳定高速连接
+
+软件依赖:
+- Python 3.9+
+- scikit-learn 1.3+
+- sentence-transformers
+- faiss-cpu
+- numpy, pandas
+
+训练时间预估:
+- 初始完整训练: 4-6小时
+- 日常增量训练: 30-60分钟
+- 数据收集阶段: 1-2小时
+- 向量化处理: 2-3小时
+
+=== 部署和使用 ===
+
+训练完成后部署:
+1. 将训练好的模型文件复制到生产环境
+2. 更新配置文件中的模型路径
+3. 重启RAG推荐服务
+4. 验证推荐质量
+
+API调用示例:
+```python
+from src.poe2build.rag.recommendation import get_build_recommendations
+
+query = {
+    "class": "Ranger",
+    "style": "bow", 
+    "goal": "endgame",
+    "budget": 15
+}
+
+recommendations = get_build_recommendations(query)
+```
+
+性能监控:
+- 推荐响应时间 < 500ms
+- 推荐准确率 > 85%
+- 系统稳定性 > 99.9%
+- 用户满意度 > 4.0/5.0
+
+=== 常见问题处理 ===
+
+Q: 训练过程中内存不足？
+A: 减少batch_size，使用分批训练，清理中间缓存
+
+Q: 数据源连接失败？
+A: 检查网络连接，使用缓存数据，启用降级模式
+
+Q: 推荐结果质量差？
+A: 增加训练数据量，调整质量阈值，优化向量化算法
+
+Q: 训练时间过长？
+A: 并行处理，优化数据结构，使用GPU加速
+
+=== 训练最佳实践 ===
+
+1. 数据质量优先
+   - 宁可数据量少，也要保证质量
+   - 定期验证数据源准确性
+   - 及时清理过期无效数据
+
+2. 增量训练为主
+   - 避免不必要的完整重训练
+   - 合理设置训练频率
+   - 平衡训练成本和效果
+
+3. 监控指标完善
+   - 建立完整的监控体系
+   - 及时发现和解决问题
+   - 持续优化训练效果
+
+4. 用户反馈重要
+   - 重视真实用户的使用体验
+   - 根据反馈调整训练策略
+   - 建立用户参与的优化循环

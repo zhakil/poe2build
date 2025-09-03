@@ -1,0 +1,475 @@
+PoE2 四大核心数据源设置配置指导
+
+=== 数据源架构概述 ===
+本系统完全基于四个真实、可用的PoE2数据源构建，确保所有推荐都基于真实游戏数据。
+
+🎯 四大核心数据源:
+1. PoE2Scout API - 实时市场价格数据
+2. PoE Ninja爬虫 - Meta趋势分析  
+3. Path of Building 2 - 官方游戏数据和计算引擎
+4. PoE2DB数据库 - 完整游戏数据库
+
+=== 1. PoE2Scout API 设置 ===
+
+数据源信息:
+- 官网: https://poe2scout.com
+- API基础URL: https://poe2scout.com/api
+- 数据类型: 物品价格、货币汇率、市场趋势
+- 更新频率: 实时 (15分钟刷新)
+
+配置参数:
+```python
+poe2scout_config = {
+    "base_url": "https://poe2scout.com/api",
+    "timeout": 10,
+    "rate_limit": {
+        "requests_per_minute": 30,
+        "backoff_factor": 2
+    },
+    "cache_ttl": 900,  # 15分钟缓存
+    "leagues": ["Standard", "Hardcore", "SSF Standard", "SSF Hardcore"]
+}
+```
+
+使用示例:
+```python
+from src.poe2build.data_sources.poe2scout.api_client import get_poe2scout_client
+
+client = get_poe2scout_client()
+prices = client.get_item_prices("Exalted Orb", league="Standard")
+exchange_rates = client.get_currency_exchange("Divine Orb", "Chaos Orb")
+```
+
+错误处理:
+- 连接超时: 自动重试3次，指数退避
+- API限流: 智能速率控制，避免封禁
+- 数据异常: 使用缓存数据降级
+- 服务不可用: 切换到备用数据源
+
+监控指标:
+- API响应时间 < 2秒
+- 数据准确率 > 95%
+- 可用性 > 99%
+- 缓存命中率 > 80%
+
+=== 2. PoE Ninja Meta分析设置 ===
+
+数据源信息:
+- 官网: https://poe.ninja/poe2/builds
+- 爬虫目标: 流行构筑、技能使用统计、升华趋势
+- 数据类型: 构筑配置、Meta趋势、玩家统计
+- 更新频率: 每小时
+
+配置参数:
+```python
+ninja_config = {
+    "base_url": "https://poe.ninja/poe2",
+    "user_agent": "PoE2BuildGenerator/2.0 (+https://github.com/zhakil/poe2build)",
+    "timeout": 15,
+    "rate_limit": {
+        "requests_per_minute": 10,
+        "backoff_factor": 3,
+        "respect_robots_txt": True
+    },
+    "cache_ttl": 3600,  # 1小时缓存
+    "max_builds_per_request": 100
+}
+```
+
+爬虫策略:
+- 遵守robots.txt规则
+- 友善的爬虫间隔 (6秒/请求)
+- 使用真实浏览器User-Agent
+- 避免并发请求过载服务器
+
+使用示例:
+```python
+from src.poe2build.data_sources.ninja.scraper import get_ninja_scraper
+
+scraper = get_ninja_scraper()
+popular_builds = scraper.get_popular_builds("Standard", limit=50)
+skill_stats = scraper.get_skill_usage_stats("Lightning Arrow")
+ascendancy_trends = scraper.get_ascendancy_trends("Deadeye")
+```
+
+数据清洗:
+- 过滤不完整的构筑数据
+- 去重相似度过高的构筑
+- 验证技能宝石搭配合理性
+- 标记异常数值和配置
+
+生态责任:
+- 严格遵守爬虫礼仪
+- 不对服务器造成负担
+- 合理缓存减少请求
+- 支持网站可持续发展
+
+=== 3. Path of Building 2 集成设置 ===
+
+数据源信息:
+- GitHub项目: https://github.com/PathOfBuildingCommunity/PathOfBuilding
+- 本地安装: 自动检测常见安装路径
+- 数据类型: 技能宝石、天赋树、基础物品、计算引擎
+- 双模式支持: GitHub在线 + 本地安装
+
+配置参数:
+```python
+pob2_config = {
+    "github_mode": {
+        "enabled": True,
+        "base_url": "https://raw.githubusercontent.com/PathOfBuildingCommunity/PathOfBuilding2/dev/Data",
+        "cache_ttl": 86400,  # 24小时缓存
+        "timeout": 30
+    },
+    "local_mode": {
+        "enabled": True,
+        "search_paths": [
+            "C:/Program Files (x86)/Path of Building Community",
+            "C:/Program Files/Path of Building Community",
+            "D:/Games/Path of Building Community",
+            os.path.expanduser("~/Documents/Path of Building Community")
+        ],
+        "data_subdirs": ["Data", "TreeData", "ModData"]
+    },
+    "fallback_priority": ["local", "github", "cache"]
+}
+```
+
+自动检测逻辑:
+```python
+def detect_pob2_installation():
+    # 1. 检查本地安装
+    for path in pob2_config["local_mode"]["search_paths"]:
+        if os.path.exists(os.path.join(path, "Path of Building.exe")):
+            return {"type": "local", "path": path}
+    
+    # 2. 检查GitHub模式可用性
+    if test_github_connectivity():
+        return {"type": "github", "path": None}
+    
+    # 3. 使用缓存数据
+    return {"type": "cache", "path": "data/pob2_cache/"}
+```
+
+使用示例:
+```python
+from src.poe2build.data_sources.pob2.data_extractor import get_pob2_extractor
+
+extractor = get_pob2_extractor(use_github=True)
+if extractor.is_available():
+    skills = extractor.get_skill_gems()
+    passives = extractor.get_passive_nodes()
+    items = extractor.get_base_items()
+```
+
+计算引擎集成:
+- 利用PoB2的DPS/EHP精确计算
+- 支持复杂的技能伤害计算
+- 天赋树路径优化算法
+- 装备搭配效果计算
+
+数据同步策略:
+- 每日检查GitHub数据更新
+- 本地数据版本检测
+- 增量更新机制
+- 数据一致性验证
+
+=== 4. PoE2DB 数据库设置 ===
+
+数据源信息:
+- 官网: https://poe2db.tw/cn/
+- API接口: 公开的查询接口
+- 数据类型: 装备详情、技能详情、升华信息、游戏机制
+- 本地化: 中文优先，英文备用
+
+配置参数:
+```python
+poe2db_config = {
+    "base_url": "https://poe2db.tw",
+    "api_endpoints": {
+        "items": "/cn/items",
+        "skills": "/cn/skills", 
+        "ascendancy": "/cn/ascendancy",
+        "search": "/cn/search"
+    },
+    "timeout": 20,
+    "rate_limit": {
+        "requests_per_minute": 20,
+        "backoff_factor": 1.5
+    },
+    "cache_ttl": 7200,  # 2小时缓存
+    "language_priority": ["cn", "en"]
+}
+```
+
+健康检查:
+```python
+def health_check_poe2db():
+    try:
+        response = requests.get(f"{base_url}/cn/", timeout=10)
+        return {
+            "status": "healthy" if response.status_code == 200 else "unhealthy",
+            "response_time": response.elapsed.total_seconds(),
+            "last_check": datetime.now()
+        }
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
+```
+
+使用示例:
+```python
+from src.poe2build.data_sources.poe2db.api_client import get_poe2db_client
+
+client = get_poe2db_client()
+item_detail = client.get_item_detail("Lightning Arrow")
+skill_info = client.get_skill_detail("Lightning Arrow", level=20)
+ascendancy_info = client.get_ascendancy_info("Deadeye")
+```
+
+数据处理:
+- 中英文数据合并
+- 属性数值标准化
+- 技能描述解析
+- 升华天赋关联分析
+
+=== 统一数据源管理 ===
+
+健康检查系统:
+```python
+from src.poe2build.data_sources import health_check_all_sources
+
+def monitor_all_sources():
+    health = health_check_all_sources()
+    for source, status in health.items():
+        if not status.get('available', True):
+            logger.warning(f"数据源 {source} 不可用: {status}")
+        else:
+            logger.info(f"数据源 {source} 正常运行")
+    return health
+```
+
+统一接口使用:
+```python
+from src.poe2build.data_sources import get_all_four_sources
+
+def initialize_all_sources():
+    scout, ninja, pob2, poe2db = get_all_four_sources()
+    
+    # 验证所有数据源可用性
+    sources_status = {
+        "poe2scout": scout is not None,
+        "poe_ninja": ninja is not None, 
+        "pob2": pob2.is_available(),
+        "poe2db": poe2db.health_check()["status"] == "healthy"
+    }
+    
+    available_count = sum(sources_status.values())
+    logger.info(f"可用数据源: {available_count}/4")
+    
+    return scout, ninja, pob2, poe2db
+```
+
+错误降级策略:
+```python
+def get_data_with_fallback(primary_source, fallback_sources, query):
+    try:
+        return primary_source.query(query)
+    except Exception as e:
+        logger.warning(f"主数据源失败: {e}")
+        for fallback in fallback_sources:
+            try:
+                return fallback.query(query)
+            except Exception:
+                continue
+        # 最后使用缓存数据
+        return get_cached_data(query)
+```
+
+=== 缓存和性能优化 ===
+
+缓存策略:
+```python
+cache_config = {
+    "poe2scout": {
+        "ttl": 900,  # 15分钟
+        "max_size": 10000,
+        "eviction": "LRU"
+    },
+    "poe_ninja": {
+        "ttl": 3600,  # 1小时
+        "max_size": 5000,
+        "eviction": "LRU"
+    },
+    "pob2": {
+        "ttl": 86400,  # 24小时
+        "max_size": 50000,
+        "eviction": "LFU"
+    },
+    "poe2db": {
+        "ttl": 7200,  # 2小时
+        "max_size": 20000,
+        "eviction": "LRU"
+    }
+}
+```
+
+连接池配置:
+```python
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+
+def setup_session():
+    session = requests.Session()
+    
+    # 重试策略
+    retry_strategy = Retry(
+        total=3,
+        backoff_factor=1,
+        status_forcelist=[429, 500, 502, 503, 504]
+    )
+    
+    # HTTP适配器
+    adapter = HTTPAdapter(
+        max_retries=retry_strategy,
+        pool_connections=10,
+        pool_maxsize=20
+    )
+    
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
+    
+    return session
+```
+
+=== 配置文件管理 ===
+
+主配置文件 (config.json):
+```json
+{
+    "data_sources": {
+        "poe2scout": {
+            "enabled": true,
+            "base_url": "https://poe2scout.com/api",
+            "rate_limit": 30,
+            "timeout": 10,
+            "cache_ttl": 900
+        },
+        "poe_ninja": {
+            "enabled": true,
+            "base_url": "https://poe.ninja/poe2",
+            "rate_limit": 10,
+            "timeout": 15,
+            "cache_ttl": 3600
+        },
+        "pob2": {
+            "enabled": true,
+            "github_mode": true,
+            "local_detection": true,
+            "cache_ttl": 86400
+        },
+        "poe2db": {
+            "enabled": true,
+            "base_url": "https://poe2db.tw",
+            "language": "cn",
+            "cache_ttl": 7200
+        }
+    },
+    "global_settings": {
+        "max_concurrent_requests": 5,
+        "default_league": "Standard",
+        "cache_directory": "data/cache/",
+        "log_level": "INFO"
+    }
+}
+```
+
+环境变量支持:
+```bash
+# 设置数据源优先级
+export POE2_DATA_SOURCES_PRIORITY="pob2,poe2scout,poe2db,ninja"
+
+# 设置缓存目录
+export POE2_CACHE_DIR="/path/to/cache"
+
+# 设置日志级别
+export POE2_LOG_LEVEL="DEBUG"
+
+# 禁用特定数据源
+export POE2_DISABLE_NINJA="true"
+```
+
+=== 部署验证清单 ===
+
+部署前检查:
+□ 四大数据源连通性测试
+□ 配置文件语法正确性验证
+□ 缓存目录权限检查
+□ 日志文件可写性验证
+□ 网络代理设置（如需要）
+
+功能验证:
+□ 数据源健康检查正常
+□ 缓存机制工作正常
+□ 错误降级策略有效
+□ 速率限制配置正确
+□ 日志记录完整
+
+性能验证:
+□ 数据获取响应时间 < 3秒
+□ 内存使用稳定
+□ 缓存命中率 > 70%
+□ 网络请求合理分布
+□ 系统资源占用正常
+
+=== 故障排除指南 ===
+
+常见问题:
+
+Q: PoE2Scout API返回403错误？
+A: 检查User-Agent设置，确保速率限制未超标，可能需要更换IP
+
+Q: PoE Ninja爬虫被封禁？
+A: 增加请求间隔，检查robots.txt遵守情况，使用代理IP
+
+Q: PoB2本地数据无法读取？
+A: 检查安装路径，验证数据文件完整性，切换到GitHub模式
+
+Q: PoE2DB连接超时？
+A: 检查网络连接，可能是地区限制，使用代理或VPN
+
+Q: 缓存文件损坏？
+A: 清空缓存目录重新生成，检查磁盘空间和权限
+
+性能优化建议:
+- 合理设置缓存TTL，平衡数据新鲜度和性能
+- 使用连接池减少连接建立开销
+- 批量请求减少网络往返次数
+- 监控数据源响应时间，及时调整策略
+- 定期清理过期缓存和日志文件
+
+=== 开发者注意事项 ===
+
+代码规范:
+- 所有网络请求必须有超时设置
+- 异常处理要详细记录错误信息
+- 关键操作要有重试机制
+- 敏感配置使用环境变量
+
+测试要求:
+- 每个数据源都要有单元测试
+- 网络请求要有mock测试
+- 错误场景要有专门测试
+- 性能测试要定期执行
+
+监控告警:
+- 数据源不可用要立即告警
+- 响应时间异常要及时通知
+- 缓存命中率下降要关注
+- 错误率超过阈值要处理
+
+文档维护:
+- API变更要及时更新文档
+- 配置参数要有详细说明
+- 故障排除指南要保持最新
+- 使用示例要验证可用性

@@ -1,0 +1,202 @@
+[
+  {
+    "entry_id": "success_factor_class_Ranger",
+    "knowledge_type": "success_factor",
+    "title": "成功因素: class_Ranger",
+    "content": {
+      "factor": "class_Ranger",
+      "occurrence_rate": 0.3333333333333333,
+      "sample_count": 2,
+      "total_successful": 6
+    },
+    "confidence": 0.3333333333333333,
+    "source": "rag_analysis",
+    "created_at": "2025-09-01T11:48:21.252344",
+    "last_verified": null,
+    "verification_count": 0,
+    "tags": [
+      "success_factor",
+      "class"
+    ]
+  },
+  {
+    "entry_id": "success_factor_skill_Lightning Arrow",
+    "knowledge_type": "success_factor",
+    "title": "成功因素: skill_Lightning Arrow",
+    "content": {
+      "factor": "skill_Lightning Arrow",
+      "occurrence_rate": 0.3333333333333333,
+      "sample_count": 2,
+      "total_successful": 6
+    },
+    "confidence": 0.3333333333333333,
+    "source": "rag_analysis",
+    "created_at": "2025-09-01T11:48:21.252344",
+    "last_verified": null,
+    "verification_count": 0,
+    "tags": [
+      "success_factor",
+      "skill"
+    ]
+  },
+  {
+    "entry_id": "success_factor_goal_clear_speed",
+    "knowledge_type": "success_factor",
+    "title": "成功因素: goal_clear_speed",
+    "content": {
+      "factor": "goal_clear_speed",
+      "occurrence_rate": 0.3333333333333333,
+      "sample_count": 2,
+      "total_successful": 6
+    },
+    "confidence": 0.3333333333333333,
+    "source": "rag_analysis",
+    "created_at": "2025-09-01T11:48:21.252344",
+    "last_verified": null,
+    "verification_count": 0,
+    "tags": [
+      "success_factor",
+      "goal"
+    ]
+  },
+  {
+    "entry_id": "success_factor_budget_friendly",
+    "knowledge_type": "success_factor",
+    "title": "成功因素: budget_friendly",
+    "content": {
+      "factor": "budget_friendly",
+      "occurrence_rate": 0.8333333333333334,
+      "sample_count": 5,
+      "total_successful": 6
+    },
+    "confidence": 0.8333333333333334,
+    "source": "rag_analysis",
+    "created_at": "2025-09-01T11:48:21.252344",
+    "last_verified": null,
+    "verification_count": 0,
+    "tags": [
+      "success_factor",
+      "budget"
+    ]
+  },
+  {
+    "entry_id": "success_factor_class_Witch",
+    "knowledge_type": "success_factor",
+    "title": "成功因素: class_Witch",
+    "content": {
+      "factor": "class_Witch",
+      "occurrence_rate": 0.3333333333333333,
+      "sample_count": 2,
+      "total_successful": 6
+    },
+    "confidence": 0.3333333333333333,
+    "source": "rag_analysis",
+    "created_at": "2025-09-01T11:48:21.252344",
+    "last_verified": null,
+    "verification_count": 0,
+    "tags": [
+      "success_factor",
+      "class"
+    ]
+  },
+  {
+    "entry_id": "success_factor_skill_Fireball",
+    "knowledge_type": "success_factor",
+    "title": "成功因素: skill_Fireball",
+    "content": {
+      "factor": "skill_Fireball",
+      "occurrence_rate": 0.3333333333333333,
+      "sample_count": 2,
+      "total_successful": 6
+    },
+    "confidence": 0.3333333333333333,
+    "source": "rag_analysis",
+    "created_at": "2025-09-01T11:48:21.252344",
+    "last_verified": null,
+    "verification_count": 0,
+    "tags": [
+      "success_factor",
+      "skill"
+    ]
+  },
+  {
+    "entry_id": "success_factor_goal_boss_killing",
+    "knowledge_type": "success_factor",
+    "title": "成功因素: goal_boss_killing",
+    "content": {
+      "factor": "goal_boss_killing",
+      "occurrence_rate": 0.3333333333333333,
+      "sample_count": 2,
+      "total_successful": 6
+    },
+    "confidence": 0.3333333333333333,
+    "source": "rag_analysis",
+    "created_at": "2025-09-01T11:48:21.252344",
+    "last_verified": null,
+    "verification_count": 0,
+    "tags": [
+      "success_factor",
+      "goal"
+    ]
+  },
+  {
+    "entry_id": "success_factor_class_Marauder",
+    "knowledge_type": "success_factor",
+    "title": "成功因素: class_Marauder",
+    "content": {
+      "factor": "class_Marauder",
+      "occurrence_rate": 0.3333333333333333,
+      "sample_count": 2,
+      "total_successful": 6
+    },
+    "confidence": 0.3333333333333333,
+    "source": "rag_analysis",
+    "created_at": "2025-09-01T11:48:21.252344",
+    "last_verified": null,
+    "verification_count": 0,
+    "tags": [
+      "success_factor",
+      "class"
+    ]
+  },
+  {
+    "entry_id": "success_factor_skill_Earthquake",
+    "knowledge_type": "success_factor",
+    "title": "成功因素: skill_Earthquake",
+    "content": {
+      "factor": "skill_Earthquake",
+      "occurrence_rate": 0.3333333333333333,
+      "sample_count": 2,
+      "total_successful": 6
+    },
+    "confidence": 0.3333333333333333,
+    "source": "rag_analysis",
+    "created_at": "2025-09-01T11:48:21.252344",
+    "last_verified": null,
+    "verification_count": 0,
+    "tags": [
+      "success_factor",
+      "skill"
+    ]
+  },
+  {
+    "entry_id": "success_factor_goal_balanced",
+    "knowledge_type": "success_factor",
+    "title": "成功因素: goal_balanced",
+    "content": {
+      "factor": "goal_balanced",
+      "occurrence_rate": 0.3333333333333333,
+      "sample_count": 2,
+      "total_successful": 6
+    },
+    "confidence": 0.3333333333333333,
+    "source": "rag_analysis",
+    "created_at": "2025-09-01T11:48:21.252344",
+    "last_verified": null,
+    "verification_count": 0,
+    "tags": [
+      "success_factor",
+      "goal"
+    ]
+  }
+]
